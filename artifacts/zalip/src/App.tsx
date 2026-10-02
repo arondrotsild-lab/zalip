@@ -82,9 +82,9 @@ const initialListings: Listing[] = [
   { id:'l-110', title:'Куртка лёгкая демисезонная', price:4600, city:'Пермь', category:'Одежда', condition:'Отличное', seller:'Вера', postedAt:'9 июня', image:'jacket', isNegotiable:false, description:'Размер 46, удобная посадка и глубокие карманы. Цвет тёмно-синий.' },
   { id:'l-111', title:'Самокат для города, складной', price:7200, city:'Краснодар', category:'Транспорт', condition:'Хорошее', seller:'Максим', postedAt:'8 июня', image:'scooter', isNegotiable:true, description:'Лёгкий, складывается одним движением. Колёса в хорошем состоянии.' },
   { id:'l-112', title:'Рабочий стол с ящиками', price:6300, city:'Москва', category:'Для дома', condition:'Хорошее', seller:'Никита', postedAt:'7 июня', image:'desk', isNegotiable:true, description:'Удобный стол для учёбы или работы. Самовывоз, помогу спустить до машины.' },
-];
+].map((listing) => ({ ...listing, city: 'Алания' }));
 const categories = ['Все объявления','Для дома','Электроника','Транспорт','Одежда','Работа','Услуги'];
-const cities = ['Все города','Москва','Санкт-Петербург','Казань','Екатеринбург','Новосибирск','Самара','Нижний Новгород','Краснодар','Пермь'];
+const cities = ['Все города','Алания'];
 const art: Record<string, {bg:string; fg:string; label:string; icon: typeof Sofa}> = {
   chair:{bg:'linear-gradient(145deg,#e3ccad,#bd8e69)',fg:'#593c2e',label:'HOME / 01',icon:Sofa},
   phone:{bg:'linear-gradient(145deg,#c6d4c8,#708d7c)',fg:'#183b33',label:'TECH / 13',icon:Smartphone},
@@ -123,9 +123,13 @@ if (new Set(initialListings.map((listing) => listing.image)).size !== initialLis
 const readLocal = <T,>(key:string, fallback:T):T => { try { const val=localStorage.getItem(key); return val ? JSON.parse(val) as T : fallback; } catch { return fallback; } };
 const loadListings = (): Listing[] => {
   const saved = readLocal<Listing[] | null>('zalip-listings', null);
-  if (!Array.isArray(saved)) return initialListings;
-  const savedIds = new Set(saved.map((item) => item?.id));
-  return [...initialListings.filter((item) => !savedIds.has(item.id)), ...saved];
+  const savedIds = new Set(Array.isArray(saved) ? saved.map((item) => item?.id) : []);
+  const merged = Array.isArray(saved)
+    ? [...initialListings.filter((item) => !savedIds.has(item.id)), ...saved]
+    : initialListings;
+  const normalized = merged.map((listing) => ({ ...listing, city: 'Алания' }));
+  localStorage.setItem('zalip-listings', JSON.stringify(normalized));
+  return normalized;
 };
 const money = (n:number) => `${n.toLocaleString('ru-RU')} ₽`;
 const shuffleIds = (ids:string[]) => {
@@ -152,7 +156,7 @@ function App() {
   const [randomOrder,setRandomOrder]=useState<string[]>(()=>shuffleIds(listings.map((item)=>item.id)));
   const [favorites,setFavorites]=useState<string[]>(()=>readLocal('zalip-favorites',[]));
   const [query,setQuery]=useState('');
-  const [city,setCity]=useState('Все города');
+  const [city,setCity]=useState('Алания');
   const [category,setCategory]=useState('Все объявления');
   const [sort,setSort]=useState('random');
   const [detail,setDetail]=useState<Listing|null>(null);
@@ -176,11 +180,11 @@ function App() {
     const title=String(data.get('title')||'').trim(); const price=Number(data.get('price'));
     if(!title||!price) return;
     const item:Listing={id:`u-${Date.now()}`,title,price,city:String(data.get('city')),category:String(data.get('category')),condition:String(data.get('condition')),seller:String(data.get('seller')||'Вы'),postedAt:'Только что',image:String(data.get('image')),isNegotiable:data.get('negotiable')==='on',description:String(data.get('description')||'Описание не добавлено.')};
-    const next=[item,...listings];setListings(next);setRandomOrder(current=>shuffleIds([...current,item.id]));localStorage.setItem('zalip-listings',JSON.stringify(next));setShowForm(false);setCategory('Все объявления');setCity('Все города');setQuery('');setPath('/');
+    const next=[item,...listings];setListings(next);setRandomOrder(current=>shuffleIds([...current,item.id]));localStorage.setItem('zalip-listings',JSON.stringify(next));setShowForm(false);setCategory('Все объявления');setCity('Алания');setQuery('');setPath('/');
   };
 
   const categoryIcon=(name:string)=>name==='Для дома'?<Sofa size={16}/>:name==='Электроника'?<Smartphone size={16}/>:name==='Транспорт'?<Bike size={16}/>:name==='Одежда'?<Shirt size={16}/>:name==='Работа'?<BriefcaseBusiness size={16}/>:name==='Услуги'?<Wrench size={16}/>:<Grid2X2 size={16}/>;
-  const resetFilters=()=>{setQuery('');setCity('Все города');setCategory('Все объявления');};
+  const resetFilters=()=>{setQuery('');setCity('Алания');setCategory('Все объявления');};
   return <div className="market-shell marketplace-page text-[#26323a]">
     <header className="market-header sticky top-0 z-30 border-b border-[#e8e1d5]">
       <div className="mx-auto flex h-[72px] max-w-[1320px] items-center gap-5 px-4 sm:px-7">
@@ -200,7 +204,7 @@ function App() {
       <div className="category-strip mx-auto flex max-w-[1320px] items-center gap-2 overflow-x-auto px-4 pb-3 sm:px-7 md:gap-5">
         <button onClick={resetFilters} className={`category-link ${category==='Все объявления'?'is-active':''}`} data-testid="button-all-categories">Все объявления</button>
         {categories.slice(1).map(cat=><button key={cat} onClick={()=>setCategory(category===cat?'Все объявления':cat)} className={`category-link ${category===cat?'is-active':''}`} data-testid={`button-category-${cat}`}>{categoryIcon(cat)}{cat}</button>)}
-        <span className="ml-auto hidden shrink-0 items-center gap-1 text-[11px] font-semibold text-[#8a918c] lg:flex"><MapPin size={13}/> Россия</span>
+        <span className="ml-auto hidden shrink-0 items-center gap-1 text-[11px] font-semibold text-[#8a918c] lg:flex"><MapPin size={13}/> Турция</span>
       </div>
       {mobileMenu&&<div className="border-t border-[#e8e1d5] bg-[#faf8f2] px-4 py-3 sm:hidden">
         <label className="mb-3 block text-xs font-bold text-[#737b76]">ГОРОД</label><select value={city} onChange={e=>setCity(e.target.value)} className="mb-3 w-full rounded-lg border border-[#ddd6ca] bg-white p-3 text-sm" data-testid="select-city-mobile">{cities.map(c=><option key={c}>{c}</option>)}</select>
@@ -213,7 +217,7 @@ function App() {
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-[10px] font-extrabold tracking-[.13em] text-[#e15d3e]"><Sparkles size={13}/>ЧТО-ТО ХОРОШЕЕ РЯДОМ</div>
           <h1 className="text-[26px] font-extrabold leading-tight tracking-[-.045em] sm:text-[32px]" data-testid="text-hero-title">{favoritePage?'Избранное':'Объявления рядом'}</h1>
-          <p className="mt-1 text-sm text-[#747d76]">{city==='Все города'?'Покупайте и продавайте по всей России':`Находки от продавцов · ${city}`}</p>
+          <p className="mt-1 text-sm text-[#747d76]">Покупайте и продавайте в Алании</p>
         </div>
         <div className="market-city-pill flex items-center gap-2 rounded-xl border border-[#e6dfd4] bg-[#fffefa] px-3.5 py-2.5 text-xs font-bold text-[#4c5a53] sm:hidden"><MapPin size={15} className="text-[#df6749]"/>{city==='Все города'?'Все города':city}<ChevronDown size={14}/></div>
         <div className="hidden items-center gap-2 sm:flex">
@@ -284,7 +288,7 @@ function App() {
       </div>
 
       <footer className="mt-12 flex flex-col gap-3 border-t border-[#e5dfd4] pt-5 text-[11px] font-semibold text-[#858b84] sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2"><span className="zalip-wordmark text-[15px] text-[#d95638]">ZALIP</span><span>Объявления, которые находят друг друга.</span></div><span>Демо-маркетплейс · Сделано для России</span>
+        <div className="flex items-center gap-2"><span className="zalip-wordmark text-[15px] text-[#d95638]">ZALIP</span><span>Объявления, которые находят друг друга.</span></div><span>Демо-маркетплейс · Сделано для Турции</span>
       </footer>
     </main>
     <div className="market-mobile-nav fixed bottom-3 left-3 right-3 z-20 flex rounded-2xl border p-1.5 sm:hidden">

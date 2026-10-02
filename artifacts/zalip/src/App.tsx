@@ -7,9 +7,17 @@ import NotFound from '@/pages/not-found';
 import { Route, Switch, useLocation, Router as WouterRouter, Link } from 'wouter';
 import { Search, Heart, Plus, MapPin, SlidersHorizontal, X, ChevronDown, Sofa, Smartphone, Bike, Shirt, Home as HomeIcon, BriefcaseBusiness, Wrench, Grid2X2, Clock3, ArrowDownUp, Check, Menu, Sparkles } from 'lucide-react';
 import chairPhoto from '@/assets/listings/zalip-chair.jpg';
-import phonePhoto from '@/assets/listings/zalip-phone.jpg';
+import phonePhoto from '@/assets/listings/zalip-phone-single.jpg';
 import bikePhoto from '@/assets/listings/zalip-bike.jpg';
 import coatPhoto from '@/assets/listings/zalip-coat.jpg';
+import tablePhoto from '@/assets/listings/zalip-table.jpg';
+import lampPhoto from '@/assets/listings/zalip-lamp.jpg';
+import headphonesPhoto from '@/assets/listings/zalip-headphones.jpg';
+import coffeePhoto from '@/assets/listings/zalip-coffee.jpg';
+import dresserPhoto from '@/assets/listings/zalip-dresser.jpg';
+import jacketPhoto from '@/assets/listings/zalip-jacket.jpg';
+import scooterPhoto from '@/assets/listings/zalip-scooter.jpg';
+import deskPhoto from '@/assets/listings/zalip-desk.jpg';
 import './marketplace.css';
 
 type Listing = {
@@ -51,15 +59,23 @@ const art: Record<string, {bg:string; fg:string; label:string; icon: typeof Sofa
 };
 const listingPhotos: Record<string, string> = {
   chair: chairPhoto, phone: phonePhoto, bike: bikePhoto, coat: coatPhoto,
-  table: chairPhoto, lamp: chairPhoto, headphones: phonePhoto, coffee: phonePhoto,
-  dresser: chairPhoto, jacket: coatPhoto, scooter: bikePhoto, desk: chairPhoto,
+  table: tablePhoto, lamp: lampPhoto, headphones: headphonesPhoto, coffee: coffeePhoto,
+  dresser: dresserPhoto, jacket: jacketPhoto, scooter: scooterPhoto, desk: deskPhoto,
 };
+if (new Set(Object.values(listingPhotos)).size !== Object.keys(listingPhotos).length) {
+  throw new Error('Each ZALIP listing type must use a unique photo.');
+}
+if (new Set(initialListings.map((listing) => listing.image)).size !== initialListings.length) {
+  throw new Error('Each demo listing must use a different photo.');
+}
 const readLocal = <T,>(key:string, fallback:T):T => { try { const val=localStorage.getItem(key); return val ? JSON.parse(val) as T : fallback; } catch { return fallback; } };
 const money = (n:number) => `${n.toLocaleString('ru-RU')} ₽`;
 
 function ArtBlock({ listing, compact=false }: {listing:Listing; compact?:boolean}) {
+  const photo = listingPhotos[listing.image];
+  if (!photo) throw new Error(`No photo configured for listing type "${listing.image}".`);
   return <div className={`market-photo ${compact?'market-photo-compact':''}`} data-testid={`img-listing-${listing.id}`}>
-    <img src={listingPhotos[listing.image] || listingPhotos.chair} alt={listing.title} loading="lazy" />
+    <img src={photo} alt={listing.title} loading="lazy" />
     <span className="photo-condition">{listing.condition}</span>
   </div>;
 }

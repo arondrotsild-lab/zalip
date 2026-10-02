@@ -48,6 +48,18 @@ type Listing = {
 };
 
 const queryClient = new QueryClient();
+const RUB_PER_USD = 83.436112;
+const CURRENCY_STORAGE_KEY = 'zalip-price-currency';
+const CURRENCY_VERSION = 'usd-v1';
+const SCOOTER_PRICES_USD: Record<string, number> = {
+  'l-211': 1250,
+  'l-212': 1350,
+  'l-213': 1500,
+  'l-214': 1100,
+  'l-215': 800,
+};
+const isScooterImage = (image: string) => image === 'scooter' || image.startsWith('scooter_');
+const rublesToDollars = (price: number) => Math.max(1, Math.round(price / RUB_PER_USD));
 const initialListings: Listing[] = [
   { id:'l-301', title:'Porsche 911 Carrera 2022, 3.0 · 18 тыс. км', price:22900000, city:'Москва', category:'Транспорт', condition:'Отличное', seller:'Алексей', postedAt:'Сегодня, 15:42', image:'premium_porsche_911', isNegotiable:true, description:'Спортивное купе в отличном состоянии, пробег 18 тыс. км. Полная история обслуживания, бережная эксплуатация и хранение в тёплом паркинге.' },
   { id:'l-302', title:'Mercedes-Benz S 500 4MATIC 2021', price:18500000, city:'Санкт-Петербург', category:'Транспорт', condition:'Отличное', seller:'Виктор', postedAt:'Сегодня, 15:30', image:'premium_mercedes_s_class', isNegotiable:false, description:'Представительский седан, пробег 33 тыс. км. Пневмоподвеска и все системы работают исправно. Обслуживание у официального дилера.' },
@@ -82,7 +94,11 @@ const initialListings: Listing[] = [
   { id:'l-110', title:'Куртка лёгкая демисезонная', price:4600, city:'Пермь', category:'Одежда', condition:'Отличное', seller:'Вера', postedAt:'9 июня', image:'jacket', isNegotiable:false, description:'Размер 46, удобная посадка и глубокие карманы. Цвет тёмно-синий.' },
   { id:'l-111', title:'Самокат для города, складной', price:7200, city:'Краснодар', category:'Транспорт', condition:'Хорошее', seller:'Максим', postedAt:'8 июня', image:'scooter', isNegotiable:true, description:'Лёгкий, складывается одним движением. Колёса в хорошем состоянии.' },
   { id:'l-112', title:'Рабочий стол с ящиками', price:6300, city:'Москва', category:'Для дома', condition:'Хорошее', seller:'Никита', postedAt:'7 июня', image:'desk', isNegotiable:true, description:'Удобный стол для учёбы или работы. Самовывоз, помогу спустить до машины.' },
-].map((listing) => ({ ...listing, city: 'Алания' }));
+].map((listing) => ({
+  ...listing,
+  city: 'Алания',
+  price: SCOOTER_PRICES_USD[listing.id] ?? rublesToDollars(listing.price),
+}));
 const categories = ['Все объявления','Для дома','Электроника','Транспорт','Одежда','Работа','Услуги'];
 const cities = ['Все города','Алания'];
 const art: Record<string, {bg:string; fg:string; label:string; icon: typeof Sofa}> = {
@@ -123,15 +139,30 @@ if (new Set(initialListings.map((listing) => listing.image)).size !== initialLis
 const readLocal = <T,>(key:string, fallback:T):T => { try { const val=localStorage.getItem(key); return val ? JSON.parse(val) as T : fallback; } catch { return fallback; } };
 const loadListings = (): Listing[] => {
   const saved = readLocal<Listing[] | null>('zalip-listings', null);
-  const savedIds = new Set(Array.isArray(saved) ? saved.map((item) => item?.id) : []);
-  const merged = Array.isArray(saved)
-    ? [...initialListings.filter((item) => !savedIds.has(item.id)), ...saved]
-    : initialListings;
-  const normalized = merged.map((listing) => ({ ...listing, city: 'Алания' }));
+  const savedPricesAreUsd = localStorage.getItem(CURRENCY_STORAGE_KEY) === CURRENCY_VERSION;
+  const normalizedSaved = Array.isArray(saved)
+    ? saved.map((listing) => {
+        let price = savedPricesAreUsd ? listing.price : rublesToDollars(listing.price);
+        if (!savedPricesAreUsd) price = SCOOTER_PRICES_USD[listing.id] ?? price;
+        if (isScooterImage(listing.image)) price = Math.min(price, 1500);
+        return { ...listing, city: 'Алания', price };
+      })
+    : [];
+  const savedIds = new Set(normalizedSaved.map((item) => item.id));
+  const normalized = [
+    ...initialListings.filter((item) => !savedIds.has(item.id)),
+    ...normalizedSaved,
+  ];
   localStorage.setItem('zalip-listings', JSON.stringify(normalized));
+  localStorage.setItem(CURRENCY_STORAGE_KEY, CURRENCY_VERSION);
   return normalized;
 };
-const money = (n:number) => `${n.toLocaleString('ru-RU')} ₽`;
+const usdFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+});
+const money = (n:number) => usdFormatter.format(n);
 const shuffleIds = (ids:string[]) => {
   const shuffled = [...ids];
   for (let index = shuffled.length - 1; index > 0; index--) {
@@ -178,8 +209,18 @@ function App() {
   const addListing=(event:FormEvent<HTMLFormElement>)=>{
     event.preventDefault(); const data=new FormData(event.currentTarget);
     const title=String(data.get('title')||'').trim(); const price=Number(data.get('price'));
+    const image=String(data.get('image'));
+    const priceField=event.currentTarget.elements.namedItem('price');
+    if(priceField instanceof HTMLInputElement) priceField.setCustomValidity('');
     if(!title||!price) return;
-    const item:Listing={id:`u-${Date.now()}`,title,price,city:String(data.get('city')),category:String(data.get('category')),condition:String(data.get('condition')),seller:String(data.get('seller')||'Вы'),postedAt:'Только что',image:String(data.get('image')),isNegotiable:data.get('negotiable')==='on',description:String(data.get('description')||'Описание не добавлено.')};
+    if(isScooterImage(image)&&price>1500) {
+      if(priceField instanceof HTMLInputElement) {
+        priceField.setCustomValidity('Цена скутера не может превышать $1,500.');
+        priceField.reportValidity();
+      }
+      return;
+    }
+    const item:Listing={id:`u-${Date.now()}`,title,price,city:String(data.get('city')),category:String(data.get('category')),condition:String(data.get('condition')),seller:String(data.get('seller')||'Вы'),postedAt:'Только что',image,isNegotiable:data.get('negotiable')==='on',description:String(data.get('description')||'Описание не добавлено.')};
     const next=[item,...listings];setListings(next);setRandomOrder(current=>shuffleIds([...current,item.id]));localStorage.setItem('zalip-listings',JSON.stringify(next));setShowForm(false);setCategory('Все объявления');setCity('Алания');setQuery('');setPath('/');
   };
 
@@ -320,7 +361,7 @@ function App() {
         <p className="mt-1 text-sm text-[#818980]">Заполните самое важное — остальное можно рассказать при встрече.</p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="sm:col-span-2"><span className="mb-1.5 block text-xs font-bold">Название объявления</span><input required name="title" maxLength={80} placeholder="Например, удобное кресло для чтения" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none focus:border-[#dc7458]" data-testid="input-listing-title"/></label>
-          <label><span className="mb-1.5 block text-xs font-bold">Цена, ₽</span><input required min="1" type="number" name="price" placeholder="5000" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none focus:border-[#dc7458]" data-testid="input-listing-price"/></label>
+          <label><span className="mb-1.5 block text-xs font-bold">Цена, $</span><input required min="1" type="number" name="price" placeholder="500" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none focus:border-[#dc7458]" data-testid="input-listing-price"/></label>
           <label><span className="mb-1.5 block text-xs font-bold">Город</span><select name="city" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none" data-testid="input-listing-city">{cities.slice(1).map(c=><option key={c}>{c}</option>)}</select></label>
           <label><span className="mb-1.5 block text-xs font-bold">Категория</span><select name="category" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none" data-testid="input-listing-category">{categories.slice(1).map(c=><option key={c}>{c}</option>)}</select></label>
           <label><span className="mb-1.5 block text-xs font-bold">Состояние</span><select name="condition" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none" data-testid="input-listing-condition"><option>Отличное</option><option>Хорошее</option><option>Новое</option><option>Есть нюансы</option></select></label>

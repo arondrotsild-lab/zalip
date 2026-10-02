@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "ZALIP"
+description = "ZALIP — площадка объявлений для поиска, просмотра и сохранения предложений в категориях товаров и услуг."
+version = "1.0.0"
+id = "artifacts/zalip"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20606
+
+[services.development]
+run = "pnpm --filter @workspace/zalip run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/zalip", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/zalip/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20606"
+BASE_PATH = "/"

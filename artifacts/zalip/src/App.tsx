@@ -18,6 +18,21 @@ import dresserPhoto from '@/assets/listings/zalip-dresser.jpg';
 import jacketPhoto from '@/assets/listings/zalip-jacket.jpg';
 import scooterPhoto from '@/assets/listings/zalip-scooter.jpg';
 import deskPhoto from '@/assets/listings/zalip-desk.jpg';
+import ladaVestaPhoto from '@/assets/listings/zalip-car-lada-vesta.jpg';
+import kiaRioPhoto from '@/assets/listings/zalip-car-kia-rio.jpg';
+import volkswagenPoloPhoto from '@/assets/listings/zalip-car-volkswagen-polo.jpg';
+import toyotaCorollaPhoto from '@/assets/listings/zalip-car-toyota-corolla.jpg';
+import renaultDusterPhoto from '@/assets/listings/zalip-car-renault-duster.jpg';
+import hondaCb500fPhoto from '@/assets/listings/zalip-moto-honda-cb500f.jpg';
+import yamahaMt07Photo from '@/assets/listings/zalip-moto-yamaha-mt07.jpg';
+import kawasakiNinja400Photo from '@/assets/listings/zalip-moto-kawasaki-ninja400.jpg';
+import suzukiVstrom650Photo from '@/assets/listings/zalip-moto-suzuki-vstrom650.jpg';
+import uralSidecarPhoto from '@/assets/listings/zalip-moto-ural-sidecar.jpg';
+import hondaPcx160Photo from '@/assets/listings/zalip-scooter-honda-pcx160.jpg';
+import yamahaNmax155Photo from '@/assets/listings/zalip-scooter-yamaha-nmax155.jpg';
+import vespaPrimaveraPhoto from '@/assets/listings/zalip-scooter-vespa-primavera.jpg';
+import symJet14Photo from '@/assets/listings/zalip-scooter-sym-jet14.jpg';
+import hondaDioPhoto from '@/assets/listings/zalip-scooter-honda-dio.jpg';
 import './marketplace.css';
 
 type Listing = {
@@ -28,6 +43,21 @@ type Listing = {
 
 const queryClient = new QueryClient();
 const initialListings: Listing[] = [
+  { id:'l-201', title:'Lada Vesta 2019, 1.6 · механика', price:875000, city:'Москва', category:'Транспорт', condition:'Хорошее', seller:'Антон', postedAt:'Сегодня, 14:20', image:'car_lada_vesta', isNegotiable:true, description:'Пробег 92 тыс. км. Двигатель и коробка работают ровно, кондиционер обслужен. Документы в порядке, возможна проверка.' },
+  { id:'l-202', title:'Kia Rio 2017, автомат', price:1090000, city:'Санкт-Петербург', category:'Транспорт', condition:'Хорошее', seller:'Марина', postedAt:'Сегодня, 14:05', image:'car_kia_rio', isNegotiable:false, description:'Пробег 115 тыс. км, один владелец в ПТС. Салон ухоженный, есть сервисная история. Осмотр по договорённости.' },
+  { id:'l-203', title:'Volkswagen Polo 2020, 1.6 · автомат', price:1450000, city:'Казань', category:'Транспорт', condition:'Отличное', seller:'Сергей', postedAt:'Сегодня, 13:48', image:'car_vw_polo', isNegotiable:true, description:'Пробег 68 тыс. км. Регулярное обслуживание, летняя резина в комплекте. Без срочных вложений.' },
+  { id:'l-204', title:'Toyota Corolla 2015, седан', price:1590000, city:'Екатеринбург', category:'Транспорт', condition:'Хорошее', seller:'Вадим', postedAt:'Сегодня, 13:32', image:'car_toyota_corolla', isNegotiable:true, description:'Пробег 142 тыс. км, экономичный двигатель 1.6. Чистый салон, недавно заменены расходники. Торг после осмотра.' },
+  { id:'l-205', title:'Renault Duster 2018, 1.6 · механика', price:1600000, city:'Новосибирск', category:'Транспорт', condition:'Хорошее', seller:'Ксения', postedAt:'Сегодня, 13:15', image:'car_renault_duster', isNegotiable:false, description:'Пробег 97 тыс. км. Практичный автомобиль для города и поездок за город. Два комплекта ключей, обслуживание по графику.' },
+  { id:'l-206', title:'Honda CB500F 2019, пробег 18 тыс. км', price:515000, city:'Самара', category:'Транспорт', condition:'Отличное', seller:'Евгений', postedAt:'Сегодня, 12:58', image:'moto_honda_cb500f', isNegotiable:true, description:'Надёжный дорожный мотоцикл, сезонное обслуживание пройдено. Пластик целый, резина ещё на сезон. Документы готовы.' },
+  { id:'l-207', title:'Yamaha MT-07 2018, пробег 22 тыс. км', price:735000, city:'Москва', category:'Транспорт', condition:'Хорошее', seller:'Артём', postedAt:'Сегодня, 12:41', image:'moto_yamaha_mt07', isNegotiable:false, description:'Лёгкий и манёвренный нейкед. Масло и фильтры заменены перед сезоном, есть небольшие следы эксплуатации.' },
+  { id:'l-208', title:'Kawasaki Ninja 400 2020', price:665000, city:'Краснодар', category:'Транспорт', condition:'Отличное', seller:'Михаил', postedAt:'Сегодня, 12:26', image:'moto_kawasaki_ninja400', isNegotiable:true, description:'Спортивный мотоцикл с пробегом 12 тыс. км. Технически исправен, хранился в гараже. Готов к осмотру.' },
+  { id:'l-209', title:'Suzuki V-Strom 650 2017, туристический', price:845000, city:'Пермь', category:'Транспорт', condition:'Хорошее', seller:'Денис', postedAt:'Сегодня, 12:09', image:'moto_suzuki_vstrom650', isNegotiable:true, description:'Удобен для дальних поездок, пробег 31 тыс. км. Высокое ветровое стекло, обслуживание без просрочек.' },
+  { id:'l-210', title:'Мотоцикл «Урал» с коляской, 2012', price:920000, city:'Нижний Новгород', category:'Транспорт', condition:'Хорошее', seller:'Игорь', postedAt:'Сегодня, 11:52', image:'moto_ural_sidecar', isNegotiable:true, description:'Классический мотоцикл с коляской, пробег 27 тыс. км. На ходу, подходит для неспешных поездок и коллекции.' },
+  { id:'l-211', title:'Скутер Honda PCX 160, 2021', price:299000, city:'Санкт-Петербург', category:'Транспорт', condition:'Отличное', seller:'Иван', postedAt:'Сегодня, 11:35', image:'scooter_honda_pcx160', isNegotiable:false, description:'Пробег 8 тыс. км. Экономичный городской скутер, кофр и ветровое стекло в комплекте. Бережная эксплуатация.' },
+  { id:'l-212', title:'Скутер Yamaha NMAX 155, 2022', price:365000, city:'Казань', category:'Транспорт', condition:'Отличное', seller:'Полина', postedAt:'Сегодня, 11:18', image:'scooter_yamaha_nmax155', isNegotiable:true, description:'Пробег 4,5 тыс. км, небольшой расход топлива. Все плановые работы выполнены, два ключа.' },
+  { id:'l-213', title:'Vespa Primavera 150, 2019', price:590000, city:'Москва', category:'Транспорт', condition:'Хорошее', seller:'Кирилл', postedAt:'Сегодня, 11:01', image:'scooter_vespa_primavera', isNegotiable:true, description:'Классический городской скутер, пробег 11 тыс. км. На ходу, аккуратный внешний вид, документы на руках.' },
+  { id:'l-214', title:'Скутер SYM Jet 14 125, 2023', price:245000, city:'Екатеринбург', category:'Транспорт', condition:'Отличное', seller:'Дарья', postedAt:'Сегодня, 10:44', image:'scooter_sym_jet14', isNegotiable:false, description:'Пробег всего 1,8 тыс. км. Удобная ровная площадка для ног, недавно пройдено ТО. Готов к сезону.' },
+  { id:'l-215', title:'Скутер Honda Dio 110, 2018', price:135000, city:'Новосибирск', category:'Транспорт', condition:'Хорошее', seller:'Павел', postedAt:'Сегодня, 10:27', image:'scooter_honda_dio', isNegotiable:true, description:'Компактный скутер для города, пробег 15 тыс. км. Экономичный, обслужен, есть небольшие косметические следы.' },
   { id:'l-101', title:'Кресло «Сканди» в отличном состоянии', price:8900, city:'Москва', category:'Для дома', condition:'Отличное', seller:'Мария', postedAt:'Сегодня, 10:42', image:'chair', isNegotiable:true, description:'Уютное кресло в светлой обивке, почти не использовалось. Отдам вместе с декоративной подушкой. Самовывоз у метро Сокол.' },
   { id:'l-102', title:'iPhone 13, 128 ГБ — без царапин', price:38900, city:'Санкт-Петербург', category:'Электроника', condition:'Хорошее', seller:'Илья', postedAt:'Сегодня, 09:18', image:'phone', isNegotiable:false, description:'Телефон полностью исправен, батарея 87%. В комплекте коробка и кабель. Можно проверить при встрече.' },
   { id:'l-103', title:'Велосипед городской, размер M', price:16700, city:'Казань', category:'Транспорт', condition:'Хорошее', seller:'Денис', postedAt:'Вчера, 19:36', image:'bike', isNegotiable:true, description:'Лёгкий городской велосипед, после обслуживания. Передачи переключаются чётко, тормоза новые.' },
@@ -61,6 +91,13 @@ const listingPhotos: Record<string, string> = {
   chair: chairPhoto, phone: phonePhoto, bike: bikePhoto, coat: coatPhoto,
   table: tablePhoto, lamp: lampPhoto, headphones: headphonesPhoto, coffee: coffeePhoto,
   dresser: dresserPhoto, jacket: jacketPhoto, scooter: scooterPhoto, desk: deskPhoto,
+  car_lada_vesta: ladaVestaPhoto, car_kia_rio: kiaRioPhoto, car_vw_polo: volkswagenPoloPhoto,
+  car_toyota_corolla: toyotaCorollaPhoto, car_renault_duster: renaultDusterPhoto,
+  moto_honda_cb500f: hondaCb500fPhoto, moto_yamaha_mt07: yamahaMt07Photo,
+  moto_kawasaki_ninja400: kawasakiNinja400Photo, moto_suzuki_vstrom650: suzukiVstrom650Photo,
+  moto_ural_sidecar: uralSidecarPhoto, scooter_honda_pcx160: hondaPcx160Photo,
+  scooter_yamaha_nmax155: yamahaNmax155Photo, scooter_vespa_primavera: vespaPrimaveraPhoto,
+  scooter_sym_jet14: symJet14Photo, scooter_honda_dio: hondaDioPhoto,
 };
 if (new Set(Object.values(listingPhotos)).size !== Object.keys(listingPhotos).length) {
   throw new Error('Each ZALIP listing type must use a unique photo.');
@@ -69,6 +106,12 @@ if (new Set(initialListings.map((listing) => listing.image)).size !== initialLis
   throw new Error('Each demo listing must use a different photo.');
 }
 const readLocal = <T,>(key:string, fallback:T):T => { try { const val=localStorage.getItem(key); return val ? JSON.parse(val) as T : fallback; } catch { return fallback; } };
+const loadListings = (): Listing[] => {
+  const saved = readLocal<Listing[] | null>('zalip-listings', null);
+  if (!Array.isArray(saved)) return initialListings;
+  const savedIds = new Set(saved.map((item) => item?.id));
+  return [...initialListings.filter((item) => !savedIds.has(item.id)), ...saved];
+};
 const money = (n:number) => `${n.toLocaleString('ru-RU')} ₽`;
 
 function ArtBlock({ listing, compact=false }: {listing:Listing; compact?:boolean}) {
@@ -82,7 +125,7 @@ function ArtBlock({ listing, compact=false }: {listing:Listing; compact?:boolean
 
 function App() {
   const [path, setPath] = useLocation();
-  const [listings,setListings]=useState<Listing[]>(()=>readLocal('zalip-listings',initialListings));
+  const [listings,setListings]=useState<Listing[]>(loadListings);
   const [favorites,setFavorites]=useState<string[]>(()=>readLocal('zalip-favorites',[]));
   const [query,setQuery]=useState('');
   const [city,setCity]=useState('Все города');

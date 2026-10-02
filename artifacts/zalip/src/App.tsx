@@ -33,6 +33,12 @@ import yamahaNmax155Photo from '@/assets/listings/zalip-scooter-yamaha-nmax155.j
 import vespaPrimaveraPhoto from '@/assets/listings/zalip-scooter-vespa-primavera.jpg';
 import symJet14Photo from '@/assets/listings/zalip-scooter-sym-jet14.jpg';
 import hondaDioPhoto from '@/assets/listings/zalip-scooter-honda-dio.jpg';
+import porsche911Photo from '@/assets/listings/zalip-premium-porsche-911.jpg';
+import mercedesSClassPhoto from '@/assets/listings/zalip-premium-mercedes-s-class.jpg';
+import bmwM5Photo from '@/assets/listings/zalip-premium-bmw-m5.jpg';
+import rangeRoverPhoto from '@/assets/listings/zalip-premium-range-rover.jpg';
+import ferrariRomaPhoto from '@/assets/listings/zalip-premium-ferrari-roma.jpg';
+import bentleyContinentalPhoto from '@/assets/listings/zalip-premium-bentley-continental.jpg';
 import './marketplace.css';
 
 type Listing = {
@@ -43,6 +49,12 @@ type Listing = {
 
 const queryClient = new QueryClient();
 const initialListings: Listing[] = [
+  { id:'l-301', title:'Porsche 911 Carrera 2022, 3.0 · 18 тыс. км', price:22900000, city:'Москва', category:'Транспорт', condition:'Отличное', seller:'Алексей', postedAt:'Сегодня, 15:42', image:'premium_porsche_911', isNegotiable:true, description:'Спортивное купе в отличном состоянии, пробег 18 тыс. км. Полная история обслуживания, бережная эксплуатация и хранение в тёплом паркинге.' },
+  { id:'l-302', title:'Mercedes-Benz S 500 4MATIC 2021', price:18500000, city:'Санкт-Петербург', category:'Транспорт', condition:'Отличное', seller:'Виктор', postedAt:'Сегодня, 15:30', image:'premium_mercedes_s_class', isNegotiable:false, description:'Представительский седан, пробег 33 тыс. км. Пневмоподвеска и все системы работают исправно. Обслуживание у официального дилера.' },
+  { id:'l-303', title:'BMW M5 Competition 2020, 4.4 · 29 тыс. км', price:14900000, city:'Казань', category:'Транспорт', condition:'Отличное', seller:'Роман', postedAt:'Сегодня, 15:18', image:'premium_bmw_m5', isNegotiable:true, description:'Мощный спортивный седан в ухоженном состоянии. Пробег 29 тыс. км, прозрачная история, два комплекта колёс.' },
+  { id:'l-304', title:'Range Rover Autobiography 2021', price:20800000, city:'Екатеринбург', category:'Транспорт', condition:'Отличное', seller:'Олег', postedAt:'Сегодня, 15:06', image:'premium_range_rover', isNegotiable:true, description:'Премиальный внедорожник, пробег 41 тыс. км. Богатая комплектация, салон без повреждений, обслуживание по регламенту.' },
+  { id:'l-305', title:'Ferrari Roma 2022, пробег 9 тыс. км', price:31500000, city:'Москва', category:'Транспорт', condition:'Отличное', seller:'Дмитрий', postedAt:'Сегодня, 14:54', image:'premium_ferrari_roma', isNegotiable:false, description:'Элегантное итальянское купе в безупречном состоянии. Пробег 9 тыс. км, автомобиль обслужен и готов к осмотру по предварительной записи.' },
+  { id:'l-306', title:'Bentley Continental GT 2020, W12', price:27900000, city:'Самара', category:'Транспорт', condition:'Отличное', seller:'Николай', postedAt:'Сегодня, 14:42', image:'premium_bentley_continental', isNegotiable:true, description:'Комфортабельное купе с двигателем W12, пробег 22 тыс. км. Кузов и салон в отличном состоянии, сервисная история в наличии.' },
   { id:'l-201', title:'Lada Vesta 2019, 1.6 · механика', price:875000, city:'Москва', category:'Транспорт', condition:'Хорошее', seller:'Антон', postedAt:'Сегодня, 14:20', image:'car_lada_vesta', isNegotiable:true, description:'Пробег 92 тыс. км. Двигатель и коробка работают ровно, кондиционер обслужен. Документы в порядке, возможна проверка.' },
   { id:'l-202', title:'Kia Rio 2017, автомат', price:1090000, city:'Санкт-Петербург', category:'Транспорт', condition:'Хорошее', seller:'Марина', postedAt:'Сегодня, 14:05', image:'car_kia_rio', isNegotiable:false, description:'Пробег 115 тыс. км, один владелец в ПТС. Салон ухоженный, есть сервисная история. Осмотр по договорённости.' },
   { id:'l-203', title:'Volkswagen Polo 2020, 1.6 · автомат', price:1450000, city:'Казань', category:'Транспорт', condition:'Отличное', seller:'Сергей', postedAt:'Сегодня, 13:48', image:'car_vw_polo', isNegotiable:true, description:'Пробег 68 тыс. км. Регулярное обслуживание, летняя резина в комплекте. Без срочных вложений.' },
@@ -98,6 +110,9 @@ const listingPhotos: Record<string, string> = {
   moto_ural_sidecar: uralSidecarPhoto, scooter_honda_pcx160: hondaPcx160Photo,
   scooter_yamaha_nmax155: yamahaNmax155Photo, scooter_vespa_primavera: vespaPrimaveraPhoto,
   scooter_sym_jet14: symJet14Photo, scooter_honda_dio: hondaDioPhoto,
+  premium_porsche_911: porsche911Photo, premium_mercedes_s_class: mercedesSClassPhoto,
+  premium_bmw_m5: bmwM5Photo, premium_range_rover: rangeRoverPhoto,
+  premium_ferrari_roma: ferrariRomaPhoto, premium_bentley_continental: bentleyContinentalPhoto,
 };
 if (new Set(Object.values(listingPhotos)).size !== Object.keys(listingPhotos).length) {
   throw new Error('Each ZALIP listing type must use a unique photo.');
@@ -113,6 +128,14 @@ const loadListings = (): Listing[] => {
   return [...initialListings.filter((item) => !savedIds.has(item.id)), ...saved];
 };
 const money = (n:number) => `${n.toLocaleString('ru-RU')} ₽`;
+const shuffleIds = (ids:string[]) => {
+  const shuffled = [...ids];
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+};
 
 function ArtBlock({ listing, compact=false }: {listing:Listing; compact?:boolean}) {
   const photo = listingPhotos[listing.image];
@@ -126,11 +149,12 @@ function ArtBlock({ listing, compact=false }: {listing:Listing; compact?:boolean
 function App() {
   const [path, setPath] = useLocation();
   const [listings,setListings]=useState<Listing[]>(loadListings);
+  const [randomOrder,setRandomOrder]=useState<string[]>(()=>shuffleIds(listings.map((item)=>item.id)));
   const [favorites,setFavorites]=useState<string[]>(()=>readLocal('zalip-favorites',[]));
   const [query,setQuery]=useState('');
   const [city,setCity]=useState('Все города');
   const [category,setCategory]=useState('Все объявления');
-  const [sort,setSort]=useState('new');
+  const [sort,setSort]=useState('random');
   const [detail,setDetail]=useState<Listing|null>(null);
   const [showForm,setShowForm]=useState(false);
   const [mobileMenu,setMobileMenu]=useState(false);
@@ -139,16 +163,20 @@ function App() {
   const setFav=(id:string)=>setFavorites(old=>{const next=old.includes(id)?old.filter(x=>x!==id):[...old,id];localStorage.setItem('zalip-favorites',JSON.stringify(next));return next;});
   const shown=useMemo(()=>{
     let rows=listings.filter(item=>(!favoritePage||favorites.includes(item.id))&&(category==='Все объявления'||item.category===category)&&(city==='Все города'||item.city===city)&&(!query||`${item.title} ${item.category} ${item.city} ${item.description}`.toLowerCase().includes(query.toLowerCase())));
+    if(sort==='random') {
+      const rank=new Map(randomOrder.map((id,index)=>[id,index]));
+      rows=[...rows].sort((a,b)=>(rank.get(a.id)??listings.length)-(rank.get(b.id)??listings.length));
+    }
     if(sort==='cheap') rows=[...rows].sort((a,b)=>a.price-b.price);
     if(sort==='expensive') rows=[...rows].sort((a,b)=>b.price-a.price);
     return rows;
-  },[listings,favorites,favoritePage,category,city,query,sort]);
+  },[listings,randomOrder,favorites,favoritePage,category,city,query,sort]);
   const addListing=(event:FormEvent<HTMLFormElement>)=>{
     event.preventDefault(); const data=new FormData(event.currentTarget);
     const title=String(data.get('title')||'').trim(); const price=Number(data.get('price'));
     if(!title||!price) return;
     const item:Listing={id:`u-${Date.now()}`,title,price,city:String(data.get('city')),category:String(data.get('category')),condition:String(data.get('condition')),seller:String(data.get('seller')||'Вы'),postedAt:'Только что',image:String(data.get('image')),isNegotiable:data.get('negotiable')==='on',description:String(data.get('description')||'Описание не добавлено.')};
-    const next=[item,...listings];setListings(next);localStorage.setItem('zalip-listings',JSON.stringify(next));setShowForm(false);setCategory('Все объявления');setCity('Все города');setQuery('');setPath('/');
+    const next=[item,...listings];setListings(next);setRandomOrder(current=>shuffleIds([...current,item.id]));localStorage.setItem('zalip-listings',JSON.stringify(next));setShowForm(false);setCategory('Все объявления');setCity('Все города');setQuery('');setPath('/');
   };
 
   const categoryIcon=(name:string)=>name==='Для дома'?<Sofa size={16}/>:name==='Электроника'?<Smartphone size={16}/>:name==='Транспорт'?<Bike size={16}/>:name==='Одежда'?<Shirt size={16}/>:name==='Работа'?<BriefcaseBusiness size={16}/>:name==='Услуги'?<Wrench size={16}/>:<Grid2X2 size={16}/>;
@@ -227,7 +255,7 @@ function App() {
             </div>
             <div className="flex items-center justify-between gap-2 sm:justify-end">
               <button onClick={resetFilters} className="flex items-center gap-1.5 rounded-lg border border-[#e5dfd4] bg-[#fffefa] px-3 py-2.5 text-[11px] font-bold text-[#68736d] sm:hidden" data-testid="button-reset-filters"><SlidersHorizontal size={14}/>Сбросить</button>
-              <label className="market-sort flex items-center gap-2 rounded-lg border border-[#e5dfd4] bg-[#fffefa] px-3 py-2.5 text-[#77817b]"><ArrowDownUp size={14}/><select value={sort} onChange={event=>setSort(event.target.value)} className="cursor-pointer bg-transparent text-[11px] font-bold text-[#47544f] outline-none" data-testid="select-sort"><option value="new">Сначала новые</option><option value="cheap">Сначала дешевле</option><option value="expensive">Сначала дороже</option></select><ChevronDown size={12}/></label>
+              <label className="market-sort flex items-center gap-2 rounded-lg border border-[#e5dfd4] bg-[#fffefa] px-3 py-2.5 text-[#77817b]"><ArrowDownUp size={14}/><select value={sort} onChange={event=>setSort(event.target.value)} className="cursor-pointer bg-transparent text-[11px] font-bold text-[#47544f] outline-none" data-testid="select-sort"><option value="random">В случайном порядке</option><option value="new">Сначала новые</option><option value="cheap">Сначала дешевле</option><option value="expensive">Сначала дороже</option></select><ChevronDown size={12}/></label>
             </div>
           </div>
 

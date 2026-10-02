@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap');
+
+.market-shell { min-height: 100dvh; background: #f6f3eb; color: #26323a; font-family: 'Manrope', sans-serif; }
+.market-shell button, .market-shell input, .market-shell select, .market-shell textarea { font: inherit; }
+.market-shell ::selection { background: #f3b49e; color: #26313a; }
+.zalip-wordmark { font-family: 'Unbounded', sans-serif; letter-spacing: -.09em; }
+.market-header { background: rgba(250,248,242,.92); backdrop-filter: blur(16px); }
+.listing-art { position: relative; isolation: isolate; overflow: hidden; }
+.listing-art::after { content: ''; position:absolute; inset:0; z-index:-1; opacity:.36; background-image:radial-gradient(rgba(34,45,50,.2) .7px, transparent .7px); background-size:7px 7px; mix-blend-mode:multiply; }
+.listing-card { transition: transform .22s ease, box-shadow .22s ease; }
+.listing-card:hover { transform: translateY(-4px); box-shadow: 0 18px 35px rgba(48,57,51,.1); }
+.fade-up { animation: fadeUp .42s cubic-bezier(.2,.75,.25,1) both; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+@media (prefers-reduced-motion: reduce) { .market-shell *, .market-shell *::before, .market-shell *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; } }

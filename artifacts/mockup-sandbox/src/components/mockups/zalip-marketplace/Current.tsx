@@ -1,0 +1,209 @@
+import { useMemo, useState, type FormEvent, type AnchorHTMLAttributes } from 'react';
+import { Search, Heart, Plus, MapPin, SlidersHorizontal, X, ChevronDown, Sofa, Smartphone, Bike, Shirt, Home as HomeIcon, BriefcaseBusiness, Wrench, Grid2X2, Clock3, ArrowUpDown, Check, Menu } from 'lucide-react';
+import './_group.css';
+
+
+type Listing = {
+  id: string; title: string; price: number; city: string; category: string;
+  condition: string; seller: string; postedAt: string; image: string;
+  isNegotiable: boolean; description: string;
+};
+
+const initialListings: Listing[] = [
+  { id:'l-101', title:'Кресло «Сканди» в отличном состоянии', price:8900, city:'Москва', category:'Для дома', condition:'Отличное', seller:'Мария', postedAt:'Сегодня, 10:42', image:'chair', isNegotiable:true, description:'Уютное кресло в светлой обивке, почти не использовалось. Отдам вместе с декоративной подушкой. Самовывоз у метро Сокол.' },
+  { id:'l-102', title:'iPhone 13, 128 ГБ — без царапин', price:38900, city:'Санкт-Петербург', category:'Электроника', condition:'Хорошее', seller:'Илья', postedAt:'Сегодня, 09:18', image:'phone', isNegotiable:false, description:'Телефон полностью исправен, батарея 87%. В комплекте коробка и кабель. Можно проверить при встрече.' },
+  { id:'l-103', title:'Велосипед городской, размер M', price:16700, city:'Казань', category:'Транспорт', condition:'Хорошее', seller:'Денис', postedAt:'Вчера, 19:36', image:'bike', isNegotiable:true, description:'Лёгкий городской велосипед, после обслуживания. Передачи переключаются чётко, тормоза новые.' },
+  { id:'l-104', title:'Пальто шерстяное, размер 44', price:5400, city:'Москва', category:'Одежда', condition:'Новое', seller:'Алина', postedAt:'Вчера, 16:02', image:'coat', isNegotiable:true, description:'Носила один раз на фотосессию. Мягкая шерсть, красивый графитовый оттенок.' },
+  { id:'l-105', title:'Стол обеденный из дуба', price:22400, city:'Екатеринбург', category:'Для дома', condition:'Хорошее', seller:'Павел', postedAt:'Вчера, 13:50', image:'table', isNegotiable:false, description:'Надёжный стол на 4–6 человек. Столешница из массива, есть небольшие следы использования.' },
+  { id:'l-106', title:'Настольная лампа с латунным основанием', price:3200, city:'Новосибирск', category:'Для дома', condition:'Отличное', seller:'Ольга', postedAt:'12 июня', image:'lamp', isNegotiable:true, description:'Тёплый свет, регулировка наклона. Хорошо смотрится на рабочем столе или прикроватной тумбе.' },
+  { id:'l-107', title:'Наушники Sony WH-1000XM4', price:17900, city:'Москва', category:'Электроника', condition:'Отличное', seller:'Тимур', postedAt:'12 июня', image:'headphones', isNegotiable:false, description:'Оригинальные наушники с шумоподавлением. Бережное использование, амбушюры целые.' },
+  { id:'l-108', title:'Кофемашина компактная DeLonghi', price:11800, city:'Самара', category:'Электроника', condition:'Хорошее', seller:'Екатерина', postedAt:'11 июня', image:'coffee', isNegotiable:true, description:'Рабочая кофемашина, регулярно чистилась. В подарок отдам пачку зёрен.' },
+  { id:'l-109', title:'Комод винтажный после реставрации', price:14900, city:'Нижний Новгород', category:'Для дома', condition:'Отличное', seller:'Соня', postedAt:'10 июня', image:'dresser', isNegotiable:true, description:'Аккуратно обновлён, ящики выдвигаются легко. Небольшой, но очень вместительный.' },
+  { id:'l-110', title:'Куртка лёгкая демисезонная', price:4600, city:'Пермь', category:'Одежда', condition:'Отличное', seller:'Вера', postedAt:'9 июня', image:'jacket', isNegotiable:false, description:'Размер 46, удобная посадка и глубокие карманы. Цвет тёмно-синий.' },
+  { id:'l-111', title:'Самокат для города, складной', price:7200, city:'Краснодар', category:'Транспорт', condition:'Хорошее', seller:'Максим', postedAt:'8 июня', image:'scooter', isNegotiable:true, description:'Лёгкий, складывается одним движением. Колёса в хорошем состоянии.' },
+  { id:'l-112', title:'Рабочий стол с ящиками', price:6300, city:'Москва', category:'Для дома', condition:'Хорошее', seller:'Никита', postedAt:'7 июня', image:'desk', isNegotiable:true, description:'Удобный стол для учёбы или работы. Самовывоз, помогу спустить до машины.' },
+];
+const categories = ['Все объявления','Для дома','Электроника','Транспорт','Одежда','Работа','Услуги'];
+const cities = ['Все города','Москва','Санкт-Петербург','Казань','Екатеринбург','Новосибирск','Самара','Нижний Новгород','Краснодар','Пермь'];
+const art: Record<string, {bg:string; fg:string; label:string; icon: typeof Sofa}> = {
+  chair:{bg:'linear-gradient(145deg,#e3ccad,#bd8e69)',fg:'#593c2e',label:'HOME / 01',icon:Sofa},
+  phone:{bg:'linear-gradient(145deg,#c6d4c8,#708d7c)',fg:'#183b33',label:'TECH / 13',icon:Smartphone},
+  bike:{bg:'linear-gradient(145deg,#ebd5a9,#c79b53)',fg:'#533c1e',label:'CITY / 02',icon:Bike},
+  coat:{bg:'linear-gradient(145deg,#dfc7c3,#a77570)',fg:'#4d2b2b',label:'ATELIER / 04',icon:Shirt},
+  table:{bg:'linear-gradient(145deg,#d5c8ad,#9d8663)',fg:'#423a2c',label:'WOOD / 05',icon:HomeIcon},
+  lamp:{bg:'linear-gradient(145deg,#e9d9aa,#bda467)',fg:'#5e4921',label:'LIGHT / 03',icon:HomeIcon},
+  headphones:{bg:'linear-gradient(145deg,#c8d0d0,#76898c)',fg:'#27383a',label:'SOUND / 04',icon:Smartphone},
+  coffee:{bg:'linear-gradient(145deg,#e5c4a8,#b57e5e)',fg:'#553528',label:'MORNING / 08',icon:HomeIcon},
+  dresser:{bg:'linear-gradient(145deg,#d7c2a6,#9e7958)',fg:'#4b3729',label:'FOUND / 09',icon:HomeIcon},
+  jacket:{bg:'linear-gradient(145deg,#c3ccd5,#798999)',fg:'#263749',label:'DAILY / 10',icon:Shirt},
+  scooter:{bg:'linear-gradient(145deg,#d2d9bd,#909c6e)',fg:'#3a452c',label:'MOVE / 11',icon:Bike},
+  desk:{bg:'linear-gradient(145deg,#d7cbb6,#a18d6f)',fg:'#4d4334',label:'STUDY / 12',icon:HomeIcon},
+};
+const readLocal = <T,>(key:string, fallback:T):T => { try { const val=localStorage.getItem(key); return val ? JSON.parse(val) as T : fallback; } catch { return fallback; } };
+const money = (n:number) => `${n.toLocaleString('ru-RU')} ₽`;
+
+function ArtBlock({ listing, compact=false }: {listing:Listing; compact?:boolean}) {
+  const config=art[listing.image] || art.chair; const Icon=config.icon;
+  return <div className={`listing-art flex items-center justify-center ${compact?'h-24':'h-52 sm:h-56'}`} style={{background:config.bg,color:config.fg}} data-testid={`img-listing-${listing.id}`}>
+    <div className="absolute left-4 top-4 rounded-full bg-[#f9f5eacc] px-2.5 py-1 text-[9px] font-extrabold tracking-[.17em] text-[#3c4643]">{config.label}</div>
+    <Icon size={compact?34:74} strokeWidth={1.05} className="relative opacity-75" />
+    <div className="absolute bottom-3 right-4 font-mono text-[9px] tracking-[.12em] opacity-65">Z / {listing.id.slice(-3)}</div>
+  </div>;
+}
+
+function App() {
+  const [path, setPath] = useState('/');
+  const Link = ({ href, onClick, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => <a href={href} {...props} onClick={event => { event.preventDefault(); setPath(href); onClick?.(event); }}>{props.children}</a>;
+  const [listings,setListings]=useState<Listing[]>(()=>readLocal('zalip-listings',initialListings));
+  const [favorites,setFavorites]=useState<string[]>(()=>readLocal('zalip-favorites',[]));
+  const [query,setQuery]=useState('');
+  const [city,setCity]=useState('Все города');
+  const [category,setCategory]=useState('Все объявления');
+  const [sort,setSort]=useState('new');
+  const [detail,setDetail]=useState<Listing|null>(null);
+  const [showForm,setShowForm]=useState(false);
+  const [mobileMenu,setMobileMenu]=useState(false);
+  const favoritePage=path==='/favorites';
+
+  const setFav=(id:string)=>setFavorites(old=>{const next=old.includes(id)?old.filter(x=>x!==id):[...old,id];localStorage.setItem('zalip-favorites',JSON.stringify(next));return next;});
+  const shown=useMemo(()=>{
+    let rows=listings.filter(item=>(!favoritePage||favorites.includes(item.id))&&(category==='Все объявления'||item.category===category)&&(city==='Все города'||item.city===city)&&(!query||`${item.title} ${item.category} ${item.city} ${item.description}`.toLowerCase().includes(query.toLowerCase())));
+    if(sort==='cheap') rows=[...rows].sort((a,b)=>a.price-b.price);
+    if(sort==='expensive') rows=[...rows].sort((a,b)=>b.price-a.price);
+    return rows;
+  },[listings,favorites,favoritePage,category,city,query,sort]);
+  const addListing=(event:FormEvent<HTMLFormElement>)=>{
+    event.preventDefault(); const data=new FormData(event.currentTarget);
+    const title=String(data.get('title')||'').trim(); const price=Number(data.get('price'));
+    if(!title||!price) return;
+    const item:Listing={id:`u-${Date.now()}`,title,price,city:String(data.get('city')),category:String(data.get('category')),condition:String(data.get('condition')),seller:String(data.get('seller')||'Вы'),postedAt:'Только что',image:String(data.get('image')),isNegotiable:data.get('negotiable')==='on',description:String(data.get('description')||'Описание не добавлено.')};
+    const next=[item,...listings];setListings(next);localStorage.setItem('zalip-listings',JSON.stringify(next));setShowForm(false);setCategory('Все объявления');setCity('Все города');setQuery('');setPath('/');
+  };
+
+  const categoryIcon=(name:string)=>name==='Для дома'?<Sofa size={16}/>:name==='Электроника'?<Smartphone size={16}/>:name==='Транспорт'?<Bike size={16}/>:name==='Одежда'?<Shirt size={16}/>:name==='Работа'?<BriefcaseBusiness size={16}/>:name==='Услуги'?<Wrench size={16}/>:<Grid2X2 size={16}/>;
+  const resetFilters=()=>{setQuery('');setCity('Все города');setCategory('Все объявления');};
+  return <div className="market-shell text-[#26323a]">
+    <header className="market-header sticky top-0 z-30 border-b border-[#e8e1d5]">
+      <div className="mx-auto flex h-[72px] max-w-[1320px] items-center gap-5 px-4 sm:px-7">
+        <button className="mr-1 rounded-lg p-2 md:hidden" aria-label="Открыть меню" onClick={()=>setMobileMenu(!mobileMenu)} data-testid="button-mobile-menu"><Menu size={20}/></button>
+        <Link href="/" className="zalip-wordmark flex shrink-0 items-center text-[24px] font-bold text-[#e15d3e]" data-testid="link-logo">ZALIP<span className="ml-1 mt-3 block h-2 w-2 rounded-full bg-[#26323a]"/></Link>
+        <div className="hidden text-[11px] font-semibold leading-tight tracking-wide text-[#778079] lg:block">НАШЁЛ —<br/>ЗАБРАЛ</div>
+        <div className="ml-auto flex w-full max-w-[660px] items-center rounded-xl border border-[#ded8cd] bg-[#fffefa] px-3 py-1.5 shadow-[0_2px_8px_rgba(60,55,46,.03)]">
+          <Search size={18} className="shrink-0 text-[#78817e]"/>
+          <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Что ищем?" className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-[#9a9e98]" data-testid="input-search"/>
+          <div className="hidden h-7 w-px bg-[#e4ded2] sm:block"/>
+          <MapPin size={16} className="ml-3 hidden shrink-0 text-[#e15d3e] sm:block"/>
+          <select value={city} onChange={e=>setCity(e.target.value)} className="hidden max-w-[145px] cursor-pointer bg-transparent px-2 py-2 text-xs font-semibold outline-none sm:block" data-testid="select-city">{cities.map(c=><option key={c}>{c}</option>)}</select>
+        </div>
+        <button onClick={()=>setShowForm(true)} className="hidden shrink-0 items-center gap-2 rounded-xl bg-[#e15d3e] px-4 py-3 text-sm font-bold text-[#fff8ef] shadow-[0_5px_12px_rgba(206,83,53,.18)] transition hover:bg-[#cf5034] sm:flex" data-testid="button-add-listing"><Plus size={17}/>Подать объявление</button>
+        <Link href="/favorites" className={`relative hidden h-11 w-11 items-center justify-center rounded-xl border transition sm:flex ${favoritePage?'border-[#f1c6b7] bg-[#fbebe5] text-[#da593b]':'border-[#e7e1d7] bg-[#fffefa] text-[#4d5856] hover:text-[#e15d3e]'}`} aria-label="Избранное" data-testid="link-favorites"><Heart size={19} fill={favoritePage?'currentColor':'none'}/>{favorites.length>0&&<span className="absolute -right-1 -top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#26323a] px-1 text-[9px] font-bold text-white" data-testid="text-favorite-count">{favorites.length}</span>}</Link>
+      </div>
+      <div className="mx-auto flex max-w-[1320px] items-center gap-2 overflow-x-auto px-4 pb-3 sm:px-7 md:gap-5">
+        <button onClick={resetFilters} className={`whitespace-nowrap text-xs font-bold ${category==='Все объявления'?'text-[#d95638]':'text-[#727b77] hover:text-[#26323a]'}`} data-testid="button-all-categories">Все объявления</button>
+        {categories.slice(1).map(cat=><button key={cat} onClick={()=>setCategory(category===cat?'Все объявления':cat)} className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-semibold transition ${category===cat?'text-[#d95638]':'text-[#727b77] hover:text-[#26323a]'}`} data-testid={`button-category-${cat}`}>{categoryIcon(cat)}{cat}</button>)}
+        <span className="ml-auto hidden shrink-0 items-center gap-1 text-[11px] font-semibold text-[#8a918c] lg:flex"><MapPin size={13}/> Россия</span>
+      </div>
+      {mobileMenu&&<div className="border-t border-[#e8e1d5] bg-[#faf8f2] px-4 py-3 sm:hidden">
+        <label className="mb-3 block text-xs font-bold text-[#737b76]">ГОРОД</label><select value={city} onChange={e=>setCity(e.target.value)} className="mb-3 w-full rounded-lg border border-[#ddd6ca] bg-white p-3 text-sm" data-testid="select-city-mobile">{cities.map(c=><option key={c}>{c}</option>)}</select>
+        <Link href="/favorites" onClick={()=>setMobileMenu(false)} className="flex items-center gap-2 py-2 text-sm font-semibold" data-testid="link-favorites-mobile"><Heart size={17}/>Избранное ({favorites.length})</Link>
+        <button onClick={()=>{setShowForm(true);setMobileMenu(false)}} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#e15d3e] p-3 font-bold text-white" data-testid="button-add-mobile"><Plus size={17}/>Подать объявление</button>
+      </div>}
+    </header>
+    <main className="mx-auto max-w-[1320px] px-4 pb-16 pt-7 sm:px-7 sm:pt-10">
+      <section className="relative mb-8 overflow-hidden rounded-[24px] bg-[#dce6dc] px-6 py-7 sm:mb-10 sm:px-10 sm:py-9">
+        <div className="absolute -right-10 -top-28 h-[310px] w-[310px] rounded-full border-[1px] border-[#7d978366] sm:right-[8%] sm:top-[-190px] sm:h-[500px] sm:w-[500px]"/>
+        <div className="absolute right-[12%] top-[-105px] hidden h-[360px] w-[360px] rounded-full border border-[#7d978344] sm:block"/>
+        <div className="relative z-10 max-w-[630px]">
+          <div className="mb-3 flex items-center gap-2 text-[10px] font-extrabold tracking-[.2em] text-[#50705f]"><span className="h-px w-6 bg-[#e15d3e]"/>СОСЕДИ УЖЕ ВЫЛОЖИЛИ НОВОЕ</div>
+          <h1 className="max-w-[570px] text-[30px] font-extrabold leading-[1.14] tracking-[-.045em] sm:text-[43px]" data-testid="text-hero-title">Хорошие вещи<br className="hidden sm:block"/> находят своих людей.</h1>
+          <p className="mt-3 max-w-[390px] text-sm leading-6 text-[#5d6c64] sm:text-[15px]">Покупайте рядом, продавайте без лишнего. Здесь всё начинается с простого «заберу».</p>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <button onClick={()=>setShowForm(true)} className="flex items-center gap-2 rounded-xl bg-[#263b36] px-4 py-3 text-sm font-bold text-[#f5f2e8] transition hover:bg-[#345148]" data-testid="button-hero-add"><Plus size={16}/>Разместить объявление</button>
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-[#63746a]"><MapPin size={14}/>В вашем городе</span>
+          </div>
+        </div>
+        <div className="absolute bottom-5 right-7 hidden rotate-[-8deg] rounded-[18px] border border-[#ffffff99] bg-[#f5efe1] px-4 py-3 shadow-[0_12px_30px_rgba(58,78,63,.12)] sm:block">
+          <div className="text-[9px] font-extrabold tracking-[.2em] text-[#84917f]">РЯДОМ С ВАМИ</div><div className="mt-1 font-mono text-[18px] font-bold text-[#31453b]">01—∞</div>
+        </div>
+      </section>
+      <div className="mb-5 flex flex-col justify-between gap-4 sm:mb-6 sm:flex-row sm:items-end">
+        <div>
+          <div className="mb-1 text-[10px] font-extrabold tracking-[.18em] text-[#e15d3e]">{favoritePage?'ВАШ ЛИЧНЫЙ СПИСОК':'СЕЙЧАС ПОКУПАЮТ И ПРОДАЮТ'}</div>
+          <h2 className="text-[25px] font-extrabold tracking-[-.045em] sm:text-[30px]" data-testid="text-section-title">{favoritePage?'Избранное':'Объявления рядом'}</h2>
+          <p className="mt-1 text-xs text-[#858b84]" data-testid="text-results-count">{shown.length} {shown.length===1?'объявление':'объявлений'} · обновляется каждый день</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-xl border border-[#e2dcd1] bg-[#fbf9f4] px-3 py-2.5 text-[#77817b]"><ArrowUpDown size={15}/><select value={sort} onChange={e=>setSort(e.target.value)} className="cursor-pointer bg-transparent text-xs font-bold text-[#47544f] outline-none" data-testid="select-sort"><option value="new">Сначала новые</option><option value="cheap">Сначала дешевле</option><option value="expensive">Сначала дороже</option></select><ChevronDown size={13}/></div>
+          <button onClick={resetFilters} className="flex items-center gap-1.5 rounded-xl border border-[#e2dcd1] bg-[#fbf9f4] px-3 py-2.5 text-xs font-bold text-[#68736d] sm:hidden" data-testid="button-reset-filters"><SlidersHorizontal size={15}/>Сбросить</button>
+        </div>
+      </div>
+      <div className="mb-5 flex items-center gap-2 overflow-x-auto pb-1 md:hidden">
+        {cities.slice(0,5).map(c=><button key={c} onClick={()=>setCity(c)} className={`whitespace-nowrap rounded-full border px-3 py-2 text-[11px] font-bold ${city===c?'border-[#263b36] bg-[#263b36] text-[#f7f3e9]':'border-[#ddd8cf] bg-[#fbf9f4] text-[#606d66]'}`} data-testid={`chip-city-${c}`}>{c}</button>)}
+      </div>
+      <div className="grid grid-cols-1 gap-x-5 gap-y-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {shown.map((item,index)=><article key={item.id} className="listing-card fade-up group cursor-pointer overflow-hidden rounded-[18px] border border-[#e9e2d7] bg-[#fffefa]" style={{animationDelay:`${Math.min(index,8)*35}ms`}} onClick={()=>setDetail(item)} data-testid={`card-listing-${item.id}`}>
+          <div className="relative"><ArtBlock listing={item}/><button aria-label={favorites.includes(item.id)?'Убрать из избранного':'В избранное'} onClick={e=>{e.stopPropagation();setFav(item.id)}} className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition ${favorites.includes(item.id)?'bg-[#f8e4db] text-[#d95638]':'bg-[#faf8f0e8] text-[#394943] hover:bg-white hover:text-[#d95638]'}`} data-testid={`button-favorite-${item.id}`}><Heart size={17} fill={favorites.includes(item.id)?'currentColor':'none'}/></button></div>
+          <div className="p-4 pt-3.5">
+            <div className="mb-1.5 flex items-start justify-between gap-2"><h3 className="line-clamp-2 min-h-[40px] text-[14px] font-bold leading-5 tracking-[-.015em] text-[#303c40]" data-testid={`text-title-${item.id}`}>{item.title}</h3></div>
+            <div className="flex items-baseline gap-2"><span className="text-[18px] font-extrabold tracking-[-.04em]" data-testid={`text-price-${item.id}`}>{money(item.price)}</span>{item.isNegotiable&&<span className="text-[10px] font-semibold text-[#89918b]">торг</span>}</div>
+            <div className="mt-3 flex items-center justify-between border-t border-[#f0ece4] pt-2.5 text-[10px] font-semibold text-[#8a918b]"><span className="flex items-center gap-1"><MapPin size={12} className="text-[#df785e]"/>{item.city}</span><span>{item.postedAt}</span></div>
+          </div>
+        </article>)}
+      </div>
+      {shown.length===0&&<div className="flex min-h-[300px] flex-col items-center justify-center rounded-[22px] border border-dashed border-[#d9d2c6] bg-[#f9f7f1] px-5 text-center" data-testid="state-empty">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e8eee7] text-[#527060]">{favoritePage?<Heart size={24}/>:<Search size={24}/>}</div>
+        <h3 className="text-lg font-extrabold tracking-tight">{favoritePage?'Пока ничего не отложили':'По вашему запросу ничего не нашлось'}</h3>
+        <p className="mt-2 max-w-[340px] text-sm leading-6 text-[#7b857f]">{favoritePage?'Сохраняйте объявления сердцем — они будут ждать вас здесь.':'Попробуйте изменить запрос или снять пару фильтров.'}</p>
+        <button onClick={resetFilters} className="mt-5 rounded-xl border border-[#dcd5c9] bg-[#fffefa] px-4 py-2.5 text-xs font-bold" data-testid="button-clear-search">Сбросить фильтры</button>
+      </div>}
+      <footer className="mt-14 flex flex-col gap-3 border-t border-[#e5dfd4] pt-5 text-[11px] font-semibold text-[#858b84] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2"><span className="zalip-wordmark text-[15px] text-[#d95638]">ZALIP</span><span>Объявления, которые находят друг друга.</span></div><span>Демо-маркетплейс · Сделано для России</span>
+      </footer>
+    </main>
+    <div className="fixed bottom-3 left-3 right-3 z-20 flex rounded-2xl border border-[#e4ddd1] bg-[#fffdf8ed] p-1.5 shadow-[0_8px_30px_rgba(43,52,45,.12)] backdrop-blur sm:hidden">
+      <Link href="/" className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-bold ${!favoritePage?'text-[#d95638]':'text-[#79817b]'}`} data-testid="mobile-nav-home"><Grid2X2 size={18}/>Объявления</Link>
+      <Link href="/favorites" className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-bold ${favoritePage?'text-[#d95638]':'text-[#79817b]'}`} data-testid="mobile-nav-favorites"><Heart size={18}/>Избранное</Link>
+      <button onClick={()=>setShowForm(true)} className="flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-bold text-[#79817b]" data-testid="mobile-nav-add"><Plus size={18}/>Разместить</button>
+    </div>
+    {detail&&<div className="fixed inset-0 z-50 flex items-end justify-center bg-[#17211ecc] p-0 backdrop-blur-[3px] sm:items-center sm:p-5" onMouseDown={e=>{if(e.target===e.currentTarget)setDetail(null)}} data-testid="dialog-listing">
+      <div className="relative max-h-[92dvh] w-full max-w-[760px] overflow-y-auto rounded-t-[24px] bg-[#faf8f2] sm:rounded-[24px]">
+        <button onClick={()=>setDetail(null)} className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-[#fffefa] shadow-sm" aria-label="Закрыть" data-testid="button-close-details"><X size={18}/></button>
+        <div className="grid sm:grid-cols-[.95fr_1.05fr]"><ArtBlock listing={detail}/><div className="p-5 sm:p-7">
+          <div className="text-[10px] font-extrabold tracking-[.18em] text-[#d95638]">{detail.category} · {detail.condition}</div>
+          <h2 className="mt-2 text-[24px] font-extrabold leading-tight tracking-[-.04em]" data-testid="text-detail-title">{detail.title}</h2>
+          <div className="mt-3 flex items-baseline gap-2"><span className="text-[27px] font-extrabold tracking-[-.05em]" data-testid="text-detail-price">{money(detail.price)}</span>{detail.isNegotiable&&<span className="text-xs font-semibold text-[#818a83]">возможен торг</span>}</div>
+          <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#66726b]"><MapPin size={16} className="text-[#dc765c]"/>{detail.city}<span className="mx-1 text-[#c3bdb2]">·</span><Clock3 size={14}/>{detail.postedAt}</div>
+          <div className="my-5 border-t border-[#e8e1d6]"/>
+          <div className="text-[10px] font-extrabold tracking-[.16em] text-[#879087]">ОБ ОБЪЯВЛЕНИИ</div>
+          <p className="mt-2 text-sm leading-6 text-[#515e58]" data-testid="text-detail-description">{detail.description}</p>
+          <div className="mt-5 flex items-center gap-3 rounded-xl bg-[#eeece3] p-3"><div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#d5e0d4] text-sm font-extrabold text-[#41614e]">{detail.seller.slice(0,1)}</div><div><div className="text-sm font-bold">{detail.seller}</div><div className="mt-0.5 text-[10px] font-semibold text-[#879087]">На ZALIP недавно</div></div><div className="ml-auto rounded-full bg-[#f7f5ed] px-2.5 py-1 text-[9px] font-bold text-[#66746a]">ЧАСТНОЕ ЛИЦО</div></div>
+          <button onClick={()=>setFav(detail.id)} className={`mt-4 flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-extrabold transition ${favorites.includes(detail.id)?'border-[#f0c6b8] bg-[#faeae4] text-[#d95638]':'border-[#e2d9cb] bg-[#fffefa] text-[#394843]'}`} data-testid="button-detail-favorite"><Heart size={17} fill={favorites.includes(detail.id)?'currentColor':'none'}/>{favorites.includes(detail.id)?'Сохранено':'Сохранить в избранное'}</button>
+        </div></div>
+      </div>
+    </div>}
+    {showForm&&<div className="fixed inset-0 z-50 flex items-end justify-center bg-[#17211ecc] p-0 backdrop-blur-[3px] sm:items-center sm:p-5" onMouseDown={e=>{if(e.target===e.currentTarget)setShowForm(false)}} data-testid="dialog-add-listing">
+      <form onSubmit={addListing} className="relative max-h-[94dvh] w-full max-w-[590px] overflow-y-auto rounded-t-[24px] bg-[#faf8f2] p-5 sm:rounded-[24px] sm:p-7">
+        <button type="button" onClick={()=>setShowForm(false)} className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#eeece3]" aria-label="Закрыть форму" data-testid="button-close-form"><X size={18}/></button>
+        <div className="text-[10px] font-extrabold tracking-[.2em] text-[#d95638]">ПУСТЬ НАЙДЁТСЯ СВОЙ ЧЕЛОВЕК</div>
+        <h2 className="mt-2 text-[25px] font-extrabold tracking-[-.045em]">Новое объявление</h2>
+        <p className="mt-1 text-sm text-[#818980]">Заполните самое важное — остальное можно рассказать при встрече.</p>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <label className="sm:col-span-2"><span className="mb-1.5 block text-xs font-bold">Название объявления</span><input required name="title" maxLength={80} placeholder="Например, удобное кресло для чтения" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none focus:border-[#dc7458]" data-testid="input-listing-title"/></label>
+          <label><span className="mb-1.5 block text-xs font-bold">Цена, ₽</span><input required min="1" type="number" name="price" placeholder="5000" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none focus:border-[#dc7458]" data-testid="input-listing-price"/></label>
+          <label><span className="mb-1.5 block text-xs font-bold">Город</span><select name="city" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none" data-testid="input-listing-city">{cities.slice(1).map(c=><option key={c}>{c}</option>)}</select></label>
+          <label><span className="mb-1.5 block text-xs font-bold">Категория</span><select name="category" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none" data-testid="input-listing-category">{categories.slice(1).map(c=><option key={c}>{c}</option>)}</select></label>
+          <label><span className="mb-1.5 block text-xs font-bold">Состояние</span><select name="condition" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none" data-testid="input-listing-condition"><option>Отличное</option><option>Хорошее</option><option>Новое</option><option>Есть нюансы</option></select></label>
+          <label><span className="mb-1.5 block text-xs font-bold">Ваше имя</span><input name="seller" placeholder="Как к вам обращаться" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none focus:border-[#dc7458]" data-testid="input-listing-seller"/></label>
+          <label className="sm:col-span-2"><span className="mb-1.5 block text-xs font-bold">Описание</span><textarea name="description" rows={3} placeholder="Расскажите о вещи, состоянии и удобном способе передачи" className="w-full resize-y rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none focus:border-[#dc7458]" data-testid="input-listing-description"/></label>
+          <label><span className="mb-1.5 block text-xs font-bold">Иллюстрация</span><select name="image" className="w-full rounded-xl border border-[#ddd6cb] bg-[#fffefa] px-3.5 py-3 text-sm outline-none" data-testid="input-listing-image">{Object.keys(art).map(key=><option key={key} value={key}>{({chair:'Кресло',phone:'Телефон',bike:'Велосипед',coat:'Одежда',table:'Стол',lamp:'Лампа',headphones:'Наушники',coffee:'Кофемашина',dresser:'Комод',jacket:'Куртка',scooter:'Самокат',desk:'Рабочий стол'} as Record<string,string>)[key]}</option>)}</select></label>
+          <label className="flex items-center gap-2 self-end pb-3 text-xs font-bold"><input type="checkbox" name="negotiable" className="h-4 w-4 accent-[#df6244]" data-testid="input-listing-negotiable"/>Готов(а) обсудить цену</label>
+        </div>
+        <button type="submit" className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#e15d3e] px-4 py-3.5 text-sm font-extrabold text-white transition hover:bg-[#cf5034]" data-testid="button-submit-listing"><Check size={17}/>Опубликовать объявление</button>
+        <p className="mt-3 text-center text-[10px] leading-4 text-[#939991]">Демо-объявление сохранится в этом браузере.</p>
+      </form>
+    </div>}
+  </div>;
+}
+
+
+export default App;

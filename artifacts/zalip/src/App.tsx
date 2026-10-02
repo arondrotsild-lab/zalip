@@ -5,7 +5,12 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, useLocation, Router as WouterRouter, Link } from 'wouter';
-import { Search, Heart, Plus, MapPin, SlidersHorizontal, X, ChevronDown, Sofa, Smartphone, Bike, Shirt, Home as HomeIcon, BriefcaseBusiness, Wrench, Grid2X2, Clock3, ArrowUpDown, Check, Menu } from 'lucide-react';
+import { Search, Heart, Plus, MapPin, SlidersHorizontal, X, ChevronDown, Sofa, Smartphone, Bike, Shirt, Home as HomeIcon, BriefcaseBusiness, Wrench, Grid2X2, Clock3, ArrowDownUp, Check, Menu, Sparkles } from 'lucide-react';
+import chairPhoto from '@/assets/listings/zalip-chair.jpg';
+import phonePhoto from '@/assets/listings/zalip-phone.jpg';
+import bikePhoto from '@/assets/listings/zalip-bike.jpg';
+import coatPhoto from '@/assets/listings/zalip-coat.jpg';
+import './marketplace.css';
 
 type Listing = {
   id: string; title: string; price: number; city: string; category: string;
@@ -44,15 +49,18 @@ const art: Record<string, {bg:string; fg:string; label:string; icon: typeof Sofa
   scooter:{bg:'linear-gradient(145deg,#d2d9bd,#909c6e)',fg:'#3a452c',label:'MOVE / 11',icon:Bike},
   desk:{bg:'linear-gradient(145deg,#d7cbb6,#a18d6f)',fg:'#4d4334',label:'STUDY / 12',icon:HomeIcon},
 };
+const listingPhotos: Record<string, string> = {
+  chair: chairPhoto, phone: phonePhoto, bike: bikePhoto, coat: coatPhoto,
+  table: chairPhoto, lamp: chairPhoto, headphones: phonePhoto, coffee: phonePhoto,
+  dresser: chairPhoto, jacket: coatPhoto, scooter: bikePhoto, desk: chairPhoto,
+};
 const readLocal = <T,>(key:string, fallback:T):T => { try { const val=localStorage.getItem(key); return val ? JSON.parse(val) as T : fallback; } catch { return fallback; } };
 const money = (n:number) => `${n.toLocaleString('ru-RU')} ₽`;
 
 function ArtBlock({ listing, compact=false }: {listing:Listing; compact?:boolean}) {
-  const config=art[listing.image] || art.chair; const Icon=config.icon;
-  return <div className={`listing-art flex items-center justify-center ${compact?'h-24':'h-52 sm:h-56'}`} style={{background:config.bg,color:config.fg}} data-testid={`img-listing-${listing.id}`}>
-    <div className="absolute left-4 top-4 rounded-full bg-[#f9f5eacc] px-2.5 py-1 text-[9px] font-extrabold tracking-[.17em] text-[#3c4643]">{config.label}</div>
-    <Icon size={compact?34:74} strokeWidth={1.05} className="relative opacity-75" />
-    <div className="absolute bottom-3 right-4 font-mono text-[9px] tracking-[.12em] opacity-65">Z / {listing.id.slice(-3)}</div>
+  return <div className={`market-photo ${compact?'market-photo-compact':''}`} data-testid={`img-listing-${listing.id}`}>
+    <img src={listingPhotos[listing.image] || listingPhotos.chair} alt={listing.title} loading="lazy" />
+    <span className="photo-condition">{listing.condition}</span>
   </div>;
 }
 
@@ -86,7 +94,7 @@ function App() {
 
   const categoryIcon=(name:string)=>name==='Для дома'?<Sofa size={16}/>:name==='Электроника'?<Smartphone size={16}/>:name==='Транспорт'?<Bike size={16}/>:name==='Одежда'?<Shirt size={16}/>:name==='Работа'?<BriefcaseBusiness size={16}/>:name==='Услуги'?<Wrench size={16}/>:<Grid2X2 size={16}/>;
   const resetFilters=()=>{setQuery('');setCity('Все города');setCategory('Все объявления');};
-  return <div className="market-shell text-[#26323a]">
+  return <div className="market-shell marketplace-page text-[#26323a]">
     <header className="market-header sticky top-0 z-30 border-b border-[#e8e1d5]">
       <div className="mx-auto flex h-[72px] max-w-[1320px] items-center gap-5 px-4 sm:px-7">
         <button className="mr-1 rounded-lg p-2 md:hidden" aria-label="Открыть меню" onClick={()=>setMobileMenu(!mobileMenu)} data-testid="button-mobile-menu"><Menu size={20}/></button>
@@ -102,9 +110,9 @@ function App() {
         <button onClick={()=>setShowForm(true)} className="hidden shrink-0 items-center gap-2 rounded-xl bg-[#e15d3e] px-4 py-3 text-sm font-bold text-[#fff8ef] shadow-[0_5px_12px_rgba(206,83,53,.18)] transition hover:bg-[#cf5034] sm:flex" data-testid="button-add-listing"><Plus size={17}/>Подать объявление</button>
         <Link href="/favorites" className={`relative hidden h-11 w-11 items-center justify-center rounded-xl border transition sm:flex ${favoritePage?'border-[#f1c6b7] bg-[#fbebe5] text-[#da593b]':'border-[#e7e1d7] bg-[#fffefa] text-[#4d5856] hover:text-[#e15d3e]'}`} aria-label="Избранное" data-testid="link-favorites"><Heart size={19} fill={favoritePage?'currentColor':'none'}/>{favorites.length>0&&<span className="absolute -right-1 -top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#26323a] px-1 text-[9px] font-bold text-white" data-testid="text-favorite-count">{favorites.length}</span>}</Link>
       </div>
-      <div className="mx-auto flex max-w-[1320px] items-center gap-2 overflow-x-auto px-4 pb-3 sm:px-7 md:gap-5">
-        <button onClick={resetFilters} className={`whitespace-nowrap text-xs font-bold ${category==='Все объявления'?'text-[#d95638]':'text-[#727b77] hover:text-[#26323a]'}`} data-testid="button-all-categories">Все объявления</button>
-        {categories.slice(1).map(cat=><button key={cat} onClick={()=>setCategory(category===cat?'Все объявления':cat)} className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-semibold transition ${category===cat?'text-[#d95638]':'text-[#727b77] hover:text-[#26323a]'}`} data-testid={`button-category-${cat}`}>{categoryIcon(cat)}{cat}</button>)}
+      <div className="category-strip mx-auto flex max-w-[1320px] items-center gap-2 overflow-x-auto px-4 pb-3 sm:px-7 md:gap-5">
+        <button onClick={resetFilters} className={`category-link ${category==='Все объявления'?'is-active':''}`} data-testid="button-all-categories">Все объявления</button>
+        {categories.slice(1).map(cat=><button key={cat} onClick={()=>setCategory(category===cat?'Все объявления':cat)} className={`category-link ${category===cat?'is-active':''}`} data-testid={`button-category-${cat}`}>{categoryIcon(cat)}{cat}</button>)}
         <span className="ml-auto hidden shrink-0 items-center gap-1 text-[11px] font-semibold text-[#8a918c] lg:flex"><MapPin size={13}/> Россия</span>
       </div>
       {mobileMenu&&<div className="border-t border-[#e8e1d5] bg-[#faf8f2] px-4 py-3 sm:hidden">
@@ -113,66 +121,94 @@ function App() {
         <button onClick={()=>{setShowForm(true);setMobileMenu(false)}} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#e15d3e] p-3 font-bold text-white" data-testid="button-add-mobile"><Plus size={17}/>Подать объявление</button>
       </div>}
     </header>
-    <main className="mx-auto max-w-[1320px] px-4 pb-16 pt-7 sm:px-7 sm:pt-10">
-      <section className="relative mb-8 overflow-hidden rounded-[24px] bg-[#dce6dc] px-6 py-7 sm:mb-10 sm:px-10 sm:py-9">
-        <div className="absolute -right-10 -top-28 h-[310px] w-[310px] rounded-full border-[1px] border-[#7d978366] sm:right-[8%] sm:top-[-190px] sm:h-[500px] sm:w-[500px]"/>
-        <div className="absolute right-[12%] top-[-105px] hidden h-[360px] w-[360px] rounded-full border border-[#7d978344] sm:block"/>
-        <div className="relative z-10 max-w-[630px]">
-          <div className="mb-3 flex items-center gap-2 text-[10px] font-extrabold tracking-[.2em] text-[#50705f]"><span className="h-px w-6 bg-[#e15d3e]"/>СОСЕДИ УЖЕ ВЫЛОЖИЛИ НОВОЕ</div>
-          <h1 className="max-w-[570px] text-[30px] font-extrabold leading-[1.14] tracking-[-.045em] sm:text-[43px]" data-testid="text-hero-title">Хорошие вещи<br className="hidden sm:block"/> находят своих людей.</h1>
-          <p className="mt-3 max-w-[390px] text-sm leading-6 text-[#5d6c64] sm:text-[15px]">Покупайте рядом, продавайте без лишнего. Здесь всё начинается с простого «заберу».</p>
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <button onClick={()=>setShowForm(true)} className="flex items-center gap-2 rounded-xl bg-[#263b36] px-4 py-3 text-sm font-bold text-[#f5f2e8] transition hover:bg-[#345148]" data-testid="button-hero-add"><Plus size={16}/>Разместить объявление</button>
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-[#63746a]"><MapPin size={14}/>В вашем городе</span>
-          </div>
+    <main className="mx-auto max-w-[1360px] px-4 pb-24 pt-5 sm:px-7 sm:pb-14 sm:pt-7">
+      <section className="market-place-heading mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div className="mb-1 flex items-center gap-1.5 text-[10px] font-extrabold tracking-[.13em] text-[#e15d3e]"><Sparkles size={13}/>ЧТО-ТО ХОРОШЕЕ РЯДОМ</div>
+          <h1 className="text-[26px] font-extrabold leading-tight tracking-[-.045em] sm:text-[32px]" data-testid="text-hero-title">{favoritePage?'Избранное':'Объявления рядом'}</h1>
+          <p className="mt-1 text-sm text-[#747d76]">{city==='Все города'?'Покупайте и продавайте по всей России':`Находки от продавцов · ${city}`}</p>
         </div>
-        <div className="absolute bottom-5 right-7 hidden rotate-[-8deg] rounded-[18px] border border-[#ffffff99] bg-[#f5efe1] px-4 py-3 shadow-[0_12px_30px_rgba(58,78,63,.12)] sm:block">
-          <div className="text-[9px] font-extrabold tracking-[.2em] text-[#84917f]">РЯДОМ С ВАМИ</div><div className="mt-1 font-mono text-[18px] font-bold text-[#31453b]">01—∞</div>
+        <div className="market-city-pill flex items-center gap-2 rounded-xl border border-[#e6dfd4] bg-[#fffefa] px-3.5 py-2.5 text-xs font-bold text-[#4c5a53] sm:hidden"><MapPin size={15} className="text-[#df6749]"/>{city==='Все города'?'Все города':city}<ChevronDown size={14}/></div>
+        <div className="hidden items-center gap-2 sm:flex">
+          <div className="market-updated rounded-xl border border-[#e6dfd4] bg-[#fffefa] px-3.5 py-2.5 text-xs font-semibold text-[#5d6961]"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#69a27a]"/>Объявления обновляются каждый день</div>
+          <button onClick={()=>setShowForm(true)} className="market-heading-add flex items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-extrabold" data-testid="button-hero-add"><Plus size={15}/>Разместить</button>
         </div>
       </section>
-      <div className="mb-5 flex flex-col justify-between gap-4 sm:mb-6 sm:flex-row sm:items-end">
-        <div>
-          <div className="mb-1 text-[10px] font-extrabold tracking-[.18em] text-[#e15d3e]">{favoritePage?'ВАШ ЛИЧНЫЙ СПИСОК':'СЕЙЧАС ПОКУПАЮТ И ПРОДАЮТ'}</div>
-          <h2 className="text-[25px] font-extrabold tracking-[-.045em] sm:text-[30px]" data-testid="text-section-title">{favoritePage?'Избранное':'Объявления рядом'}</h2>
-          <p className="mt-1 text-xs text-[#858b84]" data-testid="text-results-count">{shown.length} {shown.length===1?'объявление':'объявлений'} · обновляется каждый день</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-xl border border-[#e2dcd1] bg-[#fbf9f4] px-3 py-2.5 text-[#77817b]"><ArrowUpDown size={15}/><select value={sort} onChange={e=>setSort(e.target.value)} className="cursor-pointer bg-transparent text-xs font-bold text-[#47544f] outline-none" data-testid="select-sort"><option value="new">Сначала новые</option><option value="cheap">Сначала дешевле</option><option value="expensive">Сначала дороже</option></select><ChevronDown size={13}/></div>
-          <button onClick={resetFilters} className="flex items-center gap-1.5 rounded-xl border border-[#e2dcd1] bg-[#fbf9f4] px-3 py-2.5 text-xs font-bold text-[#68736d] sm:hidden" data-testid="button-reset-filters"><SlidersHorizontal size={15}/>Сбросить</button>
-        </div>
+
+      <div className="mb-5 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+        {categories.map(item=><button key={item} onClick={()=>setCategory(item)} className={`market-chip whitespace-nowrap rounded-full border px-3.5 py-2 text-[11px] font-bold ${category===item?'border-[#293b35] bg-[#293b35] text-[#fffaf0]':'border-[#e1dbd0] bg-[#fffefa] text-[#626d66]'}`} data-testid={item==='Все объявления'?'button-all-categories':`button-category-${item}`}>{item}</button>)}
       </div>
-      <div className="mb-5 flex items-center gap-2 overflow-x-auto pb-1 md:hidden">
-        {cities.slice(0,5).map(c=><button key={c} onClick={()=>setCity(c)} className={`whitespace-nowrap rounded-full border px-3 py-2 text-[11px] font-bold ${city===c?'border-[#263b36] bg-[#263b36] text-[#f7f3e9]':'border-[#ddd8cf] bg-[#fbf9f4] text-[#606d66]'}`} data-testid={`chip-city-${c}`}>{c}</button>)}
+      <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-1 md:hidden">
+        {cities.slice(0,5).map(item=><button key={item} onClick={()=>setCity(item)} className={`whitespace-nowrap rounded-full border px-3 py-2 text-[10px] font-bold ${city===item?'border-[#293b35] bg-[#293b35] text-[#fffaf0]':'border-[#e1dbd0] bg-[#fffefa] text-[#626d66]'}`} data-testid={`chip-city-${item}`}>{item}</button>)}
       </div>
-      <div className="grid grid-cols-1 gap-x-5 gap-y-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {shown.map((item,index)=><article key={item.id} className="listing-card fade-up group cursor-pointer overflow-hidden rounded-[18px] border border-[#e9e2d7] bg-[#fffefa]" style={{animationDelay:`${Math.min(index,8)*35}ms`}} onClick={()=>setDetail(item)} data-testid={`card-listing-${item.id}`}>
-          <div className="relative"><ArtBlock listing={item}/><button aria-label={favorites.includes(item.id)?'Убрать из избранного':'В избранное'} onClick={e=>{e.stopPropagation();setFav(item.id)}} className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition ${favorites.includes(item.id)?'bg-[#f8e4db] text-[#d95638]':'bg-[#faf8f0e8] text-[#394943] hover:bg-white hover:text-[#d95638]'}`} data-testid={`button-favorite-${item.id}`}><Heart size={17} fill={favorites.includes(item.id)?'currentColor':'none'}/></button></div>
-          <div className="p-4 pt-3.5">
-            <div className="mb-1.5 flex items-start justify-between gap-2"><h3 className="line-clamp-2 min-h-[40px] text-[14px] font-bold leading-5 tracking-[-.015em] text-[#303c40]" data-testid={`text-title-${item.id}`}>{item.title}</h3></div>
-            <div className="flex items-baseline gap-2"><span className="text-[18px] font-extrabold tracking-[-.04em]" data-testid={`text-price-${item.id}`}>{money(item.price)}</span>{item.isNegotiable&&<span className="text-[10px] font-semibold text-[#89918b]">торг</span>}</div>
-            <div className="mt-3 flex items-center justify-between border-t border-[#f0ece4] pt-2.5 text-[10px] font-semibold text-[#8a918b]"><span className="flex items-center gap-1"><MapPin size={12} className="text-[#df785e]"/>{item.city}</span><span>{item.postedAt}</span></div>
+
+      <div className="market-layout">
+        <aside className="market-sidebar hidden lg:block">
+          <div className="sidebar-panel">
+            <div className="mb-3 flex items-center justify-between"><h2 className="text-sm font-extrabold">Категории</h2><SlidersHorizontal size={15} className="text-[#8c928b]"/></div>
+            <nav className="space-y-0.5">
+              {categories.map(item=><button key={item} onClick={()=>setCategory(item)} className={`sidebar-category ${category===item?'selected':''}`} data-testid={item==='Все объявления'?'sidebar-all-categories':`sidebar-category-${item}`}>{categoryIcon(item)}<span>{item}</span>{category===item&&<span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#e15d3e]"/>}</button>)}
+            </nav>
+            <div className="my-4 border-t border-[#eee9e0]"/>
+            <label className="mb-2 block text-[10px] font-extrabold tracking-[.12em] text-[#858d85]">ГОРОД</label>
+            <div className="relative">
+              <MapPin size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#d76a4f]"/>
+              <select value={city} onChange={event=>setCity(event.target.value)} className="w-full appearance-none rounded-lg border border-[#e4ded3] bg-[#fffefa] py-2.5 pl-9 pr-8 text-xs font-bold text-[#48564f] outline-none focus:border-[#d98068]" data-testid="select-city-sidebar">{cities.map(item=><option key={item}>{item}</option>)}</select>
+              <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#858d85]"/>
+            </div>
+            <div className="mt-4 rounded-xl bg-[#f1eee5] p-3"><div className="text-[10px] font-extrabold tracking-[.1em] text-[#80887f]">НА ZALIP</div><p className="mt-1.5 text-xs leading-5 text-[#657168]">Удобные вещи и услуги от людей поблизости.</p></div>
           </div>
-        </article>)}
+        </aside>
+
+        <section className="min-w-0">
+          <div className="mb-3 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-[17px] font-extrabold tracking-[-.025em]" data-testid="text-section-title">{favoritePage?'Сохранённые объявления':category==='Все объявления'?'Свежие объявления':category}</h2>
+              <p className="mt-0.5 text-[11px] text-[#858c85]" data-testid="text-results-count">{shown.length} {shown.length===1?'объявление':'объявлений'} · рядом с вами</p>
+            </div>
+            <div className="flex items-center justify-between gap-2 sm:justify-end">
+              <button onClick={resetFilters} className="flex items-center gap-1.5 rounded-lg border border-[#e5dfd4] bg-[#fffefa] px-3 py-2.5 text-[11px] font-bold text-[#68736d] sm:hidden" data-testid="button-reset-filters"><SlidersHorizontal size={14}/>Сбросить</button>
+              <label className="market-sort flex items-center gap-2 rounded-lg border border-[#e5dfd4] bg-[#fffefa] px-3 py-2.5 text-[#77817b]"><ArrowDownUp size={14}/><select value={sort} onChange={event=>setSort(event.target.value)} className="cursor-pointer bg-transparent text-[11px] font-bold text-[#47544f] outline-none" data-testid="select-sort"><option value="new">Сначала новые</option><option value="cheap">Сначала дешевле</option><option value="expensive">Сначала дороже</option></select><ChevronDown size={12}/></label>
+            </div>
+          </div>
+
+          <div className="market-listings">
+            {shown.map((item,index)=><article key={item.id} className="market-listing fade-up group" style={{animationDelay:`${Math.min(index,8)*28}ms`}} onClick={()=>setDetail(item)} data-testid={`card-listing-${item.id}`}>
+              <div className="relative">
+                <ArtBlock listing={item}/>
+                <button aria-label={favorites.includes(item.id)?'Убрать из избранного':'В избранное'} onClick={event=>{event.stopPropagation();setFav(item.id);}} className={`market-favorite absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full transition ${favorites.includes(item.id)?'is-favorite':''}`} data-testid={`button-favorite-${item.id}`}><Heart size={17} fill={favorites.includes(item.id)?'currentColor':'none'}/></button>
+                {item.isNegotiable&&<span className="negotiable-tag absolute bottom-2.5 left-2.5 rounded-md px-2 py-1 text-[9px] font-bold">Торг уместен</span>}
+              </div>
+              <div className="market-listing-copy">
+                <h3 className="market-listing-title line-clamp-2 text-[13px] font-semibold leading-[1.45] text-[#334039]" data-testid={`text-title-${item.id}`}>{item.title}</h3>
+                <div className="mt-1.5 flex items-baseline gap-2"><span className="market-price text-[18px] font-extrabold tracking-[-.04em]" data-testid={`text-price-${item.id}`}>{money(item.price)}</span>{item.isNegotiable&&<span className="text-[10px] font-semibold text-[#90978f]">торг</span>}</div>
+                <div className="market-card-meta mt-2.5 flex items-center justify-between gap-2 border-t border-[#f0ece4] pt-2 text-[10px] font-medium text-[#838b84]"><span className="flex min-w-0 items-center gap-1 truncate"><MapPin size={12} className="shrink-0 text-[#d9755b]"/>{item.city}</span><span className="shrink-0">{item.postedAt}</span></div>
+              </div>
+            </article>)}
+          </div>
+
+          {shown.length===0&&<div className="market-empty flex min-h-[310px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#d9d2c6] px-5 text-center" data-testid="state-empty">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f2e9df] text-[#d96a4b]">{favoritePage?<Heart size={23}/>:<Search size={23}/>}</div>
+            <h3 className="text-lg font-extrabold tracking-tight">{favoritePage?'Пока ничего не отложили':'По вашему запросу ничего не нашлось'}</h3>
+            <p className="mt-2 max-w-[340px] text-sm leading-6 text-[#7b857f]">{favoritePage?'Сохраняйте объявления сердцем — они будут ждать вас здесь.':'Попробуйте изменить запрос или снять пару фильтров.'}</p>
+            <button onClick={resetFilters} className="mt-5 rounded-lg border border-[#dcd5c9] bg-[#fffefa] px-4 py-2.5 text-xs font-bold" data-testid="button-clear-search">Сбросить фильтры</button>
+          </div>}
+        </section>
       </div>
-      {shown.length===0&&<div className="flex min-h-[300px] flex-col items-center justify-center rounded-[22px] border border-dashed border-[#d9d2c6] bg-[#f9f7f1] px-5 text-center" data-testid="state-empty">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e8eee7] text-[#527060]">{favoritePage?<Heart size={24}/>:<Search size={24}/>}</div>
-        <h3 className="text-lg font-extrabold tracking-tight">{favoritePage?'Пока ничего не отложили':'По вашему запросу ничего не нашлось'}</h3>
-        <p className="mt-2 max-w-[340px] text-sm leading-6 text-[#7b857f]">{favoritePage?'Сохраняйте объявления сердцем — они будут ждать вас здесь.':'Попробуйте изменить запрос или снять пару фильтров.'}</p>
-        <button onClick={resetFilters} className="mt-5 rounded-xl border border-[#dcd5c9] bg-[#fffefa] px-4 py-2.5 text-xs font-bold" data-testid="button-clear-search">Сбросить фильтры</button>
-      </div>}
-      <footer className="mt-14 flex flex-col gap-3 border-t border-[#e5dfd4] pt-5 text-[11px] font-semibold text-[#858b84] sm:flex-row sm:items-center sm:justify-between">
+
+      <footer className="mt-12 flex flex-col gap-3 border-t border-[#e5dfd4] pt-5 text-[11px] font-semibold text-[#858b84] sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2"><span className="zalip-wordmark text-[15px] text-[#d95638]">ZALIP</span><span>Объявления, которые находят друг друга.</span></div><span>Демо-маркетплейс · Сделано для России</span>
       </footer>
     </main>
-    <div className="fixed bottom-3 left-3 right-3 z-20 flex rounded-2xl border border-[#e4ddd1] bg-[#fffdf8ed] p-1.5 shadow-[0_8px_30px_rgba(43,52,45,.12)] backdrop-blur sm:hidden">
+    <div className="market-mobile-nav fixed bottom-3 left-3 right-3 z-20 flex rounded-2xl border p-1.5 sm:hidden">
       <Link href="/" className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-bold ${!favoritePage?'text-[#d95638]':'text-[#79817b]'}`} data-testid="mobile-nav-home"><Grid2X2 size={18}/>Объявления</Link>
       <Link href="/favorites" className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-bold ${favoritePage?'text-[#d95638]':'text-[#79817b]'}`} data-testid="mobile-nav-favorites"><Heart size={18}/>Избранное</Link>
       <button onClick={()=>setShowForm(true)} className="flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-bold text-[#79817b]" data-testid="mobile-nav-add"><Plus size={18}/>Разместить</button>
     </div>
-    {detail&&<div className="fixed inset-0 z-50 flex items-end justify-center bg-[#17211ecc] p-0 backdrop-blur-[3px] sm:items-center sm:p-5" onMouseDown={e=>{if(e.target===e.currentTarget)setDetail(null)}} data-testid="dialog-listing">
-      <div className="relative max-h-[92dvh] w-full max-w-[760px] overflow-y-auto rounded-t-[24px] bg-[#faf8f2] sm:rounded-[24px]">
+    {detail&&<div className="market-overlay fixed inset-0 z-50 flex items-end justify-center bg-[#17211ecc] p-0 backdrop-blur-[3px] sm:items-center sm:p-5" onMouseDown={e=>{if(e.target===e.currentTarget)setDetail(null)}} data-testid="dialog-listing">
+      <div className="market-dialog relative max-h-[92dvh] w-full max-w-[760px] overflow-y-auto rounded-t-[24px] bg-[#faf8f2] sm:rounded-[24px]">
         <button onClick={()=>setDetail(null)} className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-[#fffefa] shadow-sm" aria-label="Закрыть" data-testid="button-close-details"><X size={18}/></button>
-        <div className="grid sm:grid-cols-[.95fr_1.05fr]"><ArtBlock listing={detail}/><div className="p-5 sm:p-7">
+        <div className="grid sm:grid-cols-[.95fr_1.05fr]"><div className="detail-photo"><ArtBlock listing={detail}/></div><div className="p-5 sm:p-7">
           <div className="text-[10px] font-extrabold tracking-[.18em] text-[#d95638]">{detail.category} · {detail.condition}</div>
           <h2 className="mt-2 text-[24px] font-extrabold leading-tight tracking-[-.04em]" data-testid="text-detail-title">{detail.title}</h2>
           <div className="mt-3 flex items-baseline gap-2"><span className="text-[27px] font-extrabold tracking-[-.05em]" data-testid="text-detail-price">{money(detail.price)}</span>{detail.isNegotiable&&<span className="text-xs font-semibold text-[#818a83]">возможен торг</span>}</div>
@@ -185,8 +221,8 @@ function App() {
         </div></div>
       </div>
     </div>}
-    {showForm&&<div className="fixed inset-0 z-50 flex items-end justify-center bg-[#17211ecc] p-0 backdrop-blur-[3px] sm:items-center sm:p-5" onMouseDown={e=>{if(e.target===e.currentTarget)setShowForm(false)}} data-testid="dialog-add-listing">
-      <form onSubmit={addListing} className="relative max-h-[94dvh] w-full max-w-[590px] overflow-y-auto rounded-t-[24px] bg-[#faf8f2] p-5 sm:rounded-[24px] sm:p-7">
+    {showForm&&<div className="market-overlay fixed inset-0 z-50 flex items-end justify-center bg-[#17211ecc] p-0 backdrop-blur-[3px] sm:items-center sm:p-5" onMouseDown={e=>{if(e.target===e.currentTarget)setShowForm(false)}} data-testid="dialog-add-listing">
+      <form onSubmit={addListing} className="market-dialog relative max-h-[94dvh] w-full max-w-[590px] overflow-y-auto rounded-t-[24px] bg-[#faf8f2] p-5 sm:rounded-[24px] sm:p-7">
         <button type="button" onClick={()=>setShowForm(false)} className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#eeece3]" aria-label="Закрыть форму" data-testid="button-close-form"><X size={18}/></button>
         <div className="text-[10px] font-extrabold tracking-[.2em] text-[#d95638]">ПУСТЬ НАЙДЁТСЯ СВОЙ ЧЕЛОВЕК</div>
         <h2 className="mt-2 text-[25px] font-extrabold tracking-[-.045em]">Новое объявление</h2>

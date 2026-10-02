@@ -1,0 +1,300 @@
+.marketplace-page {
+  --market-paper: #f6f4ee;
+  --market-card: #fffefa;
+  color: #283630;
+  background: var(--market-paper);
+}
+
+.marketplace-page .market-header {
+  background: rgba(250, 248, 242, .96);
+  backdrop-filter: blur(16px);
+}
+
+.marketplace-page .market-search {
+  box-shadow: 0 2px 8px rgba(60, 55, 46, .035);
+}
+
+.marketplace-page .market-search:focus-within {
+  border-color: #d59a88;
+  box-shadow: 0 0 0 3px rgba(225, 93, 62, .08);
+}
+
+.marketplace-page .category-strip {
+  scrollbar-width: none;
+}
+
+.marketplace-page .category-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.marketplace-page .category-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  border-radius: 9px;
+  padding: 8px 12px;
+  color: #69736c;
+  font-size: 11px;
+  font-weight: 700;
+  transition: color .18s ease, background-color .18s ease;
+}
+
+.marketplace-page .category-link:hover {
+  background: #f0ece3;
+  color: #36433c;
+}
+
+.marketplace-page .category-link.is-active {
+  background: #f7e9e1;
+  color: #d65b3e;
+}
+
+.marketplace-page .market-layout {
+  display: grid;
+  grid-template-columns: 218px minmax(0, 1fr);
+  align-items: start;
+  gap: 23px;
+}
+
+.marketplace-page .sidebar-panel {
+  position: sticky;
+  top: 140px;
+  border: 1px solid #e8e2d7;
+  border-radius: 15px;
+  background: #fffefa;
+  padding: 17px 13px 13px;
+}
+
+.marketplace-page .sidebar-category {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  border-radius: 9px;
+  padding: 9px;
+  color: #69746c;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 650;
+  transition: background-color .18s ease, color .18s ease;
+}
+
+.marketplace-page .sidebar-category:hover,
+.marketplace-page .sidebar-category.selected {
+  background: #f7f4ed;
+  color: #39473f;
+}
+
+.marketplace-page .sidebar-category.selected {
+  font-weight: 800;
+}
+
+.marketplace-page .market-listings {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.marketplace-page .market-listing {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e9e3d9;
+  border-radius: 13px;
+  background: var(--market-card);
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.marketplace-page .market-listing:hover {
+  transform: translateY(-3px);
+  border-color: #ded5c9;
+  box-shadow: 0 12px 24px rgba(45, 54, 47, .09);
+}
+
+.marketplace-page .market-photo {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 1.17 / 1;
+  overflow: hidden;
+  background: #e9e4da;
+}
+
+.marketplace-page .market-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .4s cubic-bezier(.2, .75, .25, 1);
+}
+
+.marketplace-page .market-listing:hover .market-photo img {
+  transform: scale(1.035);
+}
+
+.marketplace-page .photo-condition {
+  position: absolute;
+  z-index: 1;
+  bottom: 9px;
+  left: 9px;
+  border: 1px solid rgba(255, 255, 255, .66);
+  border-radius: 5px;
+  background: rgba(255, 254, 250, .9);
+  padding: 4px 7px;
+  color: #526057;
+  font-size: 9px;
+  font-weight: 750;
+  backdrop-filter: blur(8px);
+}
+
+.marketplace-page .market-favorite {
+  z-index: 2;
+  background: rgba(255, 254, 250, .94);
+  color: #4b5850;
+  box-shadow: 0 2px 8px rgba(41, 48, 42, .12);
+}
+
+.marketplace-page .market-favorite:hover {
+  color: #d85c40;
+  transform: scale(1.05);
+}
+
+.marketplace-page .market-favorite.is-favorite {
+  background: #f9e5dd;
+  color: #d95638;
+}
+
+.marketplace-page .negotiable-tag {
+  z-index: 2;
+  background: rgba(37, 52, 45, .78);
+  color: #fff9ef;
+  backdrop-filter: blur(5px);
+}
+
+.marketplace-page .market-listing-copy {
+  padding: 11px 12px 12px;
+}
+
+.marketplace-page .market-listing-title {
+  min-height: 38px;
+}
+
+.marketplace-page .market-price {
+  color: #26352e;
+}
+
+.marketplace-page .market-empty {
+  background: #faf8f2;
+}
+
+.marketplace-page .market-mobile-nav {
+  border-color: #e4ddd1;
+  background: rgba(255, 253, 248, .96);
+  box-shadow: 0 8px 30px rgba(43, 52, 45, .12);
+  backdrop-filter: blur(16px);
+}
+
+.marketplace-page .market-overlay {
+  background: rgba(23, 33, 30, .76);
+  backdrop-filter: blur(3px);
+}
+
+.marketplace-page .market-dialog {
+  background: #faf8f2;
+  color: #283630;
+  box-shadow: 0 24px 70px rgba(18, 28, 24, .25);
+}
+
+.marketplace-page .detail-photo .market-photo {
+  height: 100%;
+  min-height: 340px;
+  aspect-ratio: auto;
+}
+
+.marketplace-page .form-control {
+  border-color: #ddd6cb;
+  background: #fffefa;
+  color: #283630;
+}
+
+.marketplace-page .form-control:focus {
+  border-color: #dc7458;
+  box-shadow: 0 0 0 3px rgba(225, 93, 62, .08);
+}
+
+.marketplace-page .fade-up {
+  animation: marketFadeUp .38s cubic-bezier(.2, .75, .25, 1) both;
+}
+
+@keyframes marketFadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1279px) {
+  .marketplace-page .market-listings {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1023px) {
+  .marketplace-page .market-layout {
+    display: block;
+  }
+
+  .marketplace-page .market-listings {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .marketplace-page .market-listings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .marketplace-page .market-photo {
+    aspect-ratio: 1.08 / 1;
+  }
+
+  .marketplace-page .market-listing-copy {
+    padding: 9px 10px 10px;
+  }
+
+  .marketplace-page .market-listing-title {
+    min-height: 36px;
+    font-size: 12px;
+  }
+
+  .marketplace-page .market-price {
+    font-size: 16px;
+  }
+
+  .marketplace-page .market-card-meta {
+    flex-wrap: wrap;
+    font-size: 9px;
+  }
+
+  .marketplace-page .detail-photo .market-photo {
+    min-height: 245px;
+    max-height: 38vh;
+  }
+}
+
+@media (max-width: 370px) {
+  .marketplace-page .market-listings {
+    grid-template-columns: 1fr;
+  }
+
+  .marketplace-page .market-photo {
+    aspect-ratio: 1.35 / 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketplace-page *,
+  .marketplace-page *::before,
+  .marketplace-page *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
